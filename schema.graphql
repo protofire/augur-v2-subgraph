@@ -1,0 +1,7 @@
+type Universe @entity {
+  id: ID!
+}
+
+type Market @entity {
+  id: ID!
+}

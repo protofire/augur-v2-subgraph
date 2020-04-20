@@ -1,0 +1,75 @@
+specVersion: 0.0.2
+description: Augur v2 subgraph
+repository: https://github.com/protofire/augur-v2-subgraph
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Augur
+    network: kovan
+    source:
+      address: "0x2884ac66c8a752A4A3445f50faFb4e1f0b502796"
+      abi: Augur
+      startBlock: 18010675
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/mappings.ts
+      entities:
+        - Delegate
+      abis:
+        - name: Augur
+          file: ./abis/Augur.json
+      eventHandlers:
+        - event: MarketCreated(indexed address,uint256,string,address,indexed address,address,uint256,int256[],uint8,uint256,bytes32[],uint256,uint256)
+          handler: handleMarketCreated
+        - event: MarketFinalized(indexed address,indexed address,uint256,uint256[])
+          handler: handleMarketFinalized
+        - event: MarketTransferred(indexed address,indexed address,address,address)
+          handler: handleMarketTransferred
+        - event: UniverseCreated(indexed address,indexed address,uint256[],uint256)
+          handler: handleUniverseCreated
+        - event: UniverseForked(indexed address,address)
+          handler: handleUniverseForked
+# Markets
+  # - MarketCreated(indexed address,uint256,string,address,indexed address,address,uint256,int256[],uint8,uint256,bytes32[],uint256,uint256)
+  # - MarketFinalized(indexed address,indexed address,uint256,uint256[])
+  # - MarketMigrated(indexed address,indexed address,indexed address)
+  # - MarketOIChanged(indexed address,indexed address,uint256)
+  # - MarketParticipantsDisavowed(indexed address,indexed address)
+  # - MarketRepBondTransferred(indexed address,address,address,address)
+  # - MarketTransferred(indexed address,indexed address,address,address)
+# Universe
+  # - UniverseCreated(indexed address,indexed address,uint256[],uint256)
+  # - UniverseForked(indexed address,address)
+
+
+  # - CompleteSetsPurchased(indexed address,indexed address,indexed address,uint256,uint256)
+  # - CompleteSetsSold(indexed address,indexed address,indexed address,uint256,uint256,uint256)
+  # - DesignatedReportStakeChanged(indexed address,uint256)
+  # - DisputeCrowdsourcerCompleted(indexed address,indexed address,address,uint256[],uint256,uint256,bool,uint256,uint256,uint256,uint256)
+  # - DisputeCrowdsourcerContribution(indexed address,indexed address,indexed address,address,uint256,string,uint256[],uint256,uint256,uint256,uint256)
+  # - DisputeCrowdsourcerCreated(indexed address,indexed address,address,uint256[],uint256,uint256)
+  # - DisputeCrowdsourcerRedeemed(indexed address,indexed address,indexed address,address,uint256,uint256,uint256[],uint256)
+  # - DisputeWindowCreated(indexed address,address,uint256,uint256,uint256,bool)
+  # - FinishDeployment()
+  # - InitialReportSubmitted(indexed address,indexed address,indexed address,address,uint256,bool,uint256[],string,uint256,uint256,uint256)
+  # - InitialReporterRedeemed(indexed address,indexed address,indexed address,address,uint256,uint256,uint256[],uint256)
+  # - InitialReporterTransferred(indexed address,indexed address,address,address)
+
+  # - NoShowBondChanged(indexed address,uint256)
+  # - ParticipationTokensRedeemed(indexed address,indexed address,indexed address,uint256,uint256,uint256)
+  # - RegisterContract(address,bytes32)
+  # - ReportingFeeChanged(indexed address,uint256)
+  # - ReportingParticipantDisavowed(indexed address,indexed address,address)
+  # - ShareTokenBalanceChanged(indexed address,indexed address,indexed address,uint256,uint256)
+  # - TimestampSet(uint256)
+  # - TokenBalanceChanged(indexed address,indexed address,address,uint8,address,uint256,uint256)
+  # - TokensBurned(indexed address,indexed address,indexed address,uint256,uint8,address,uint256)
+  # - TokensMinted(indexed address,indexed address,indexed address,uint256,uint8,address,uint256)
+  # - TokensTransferred(indexed address,address,indexed address,indexed address,uint256,uint8,address)
+  # - TradingProceedsClaimed(indexed address,indexed address,address,uint256,uint256,uint256,uint256,uint256)
+
+  # - ValidityBondChanged(indexed address,uint256)
+  # - WarpSyncDataUpdated(indexed address,uint256,uint256)
