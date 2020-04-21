@@ -1,4 +1,4 @@
-import { Universe, Market } from "../../generated/schema";
+import { Universe, Market, User } from "../../generated/schema";
 import {
   Address,
   EthereumEvent,
@@ -16,17 +16,12 @@ import {
 
 export function getOrCreateUniverse(
   id: String,
-  createIfNotFound: boolean = true,
-  save: boolean = true
+  createIfNotFound: boolean = true
 ): Universe {
   let universe = Universe.load(id);
 
   if (universe == null && createIfNotFound) {
     universe = new Universe(id);
-
-    if (save) {
-      universe.save();
-    }
   }
 
   return universe as Universe;
@@ -34,18 +29,31 @@ export function getOrCreateUniverse(
 
 export function getOrCreateMarket(
   id: String,
-  createIfNotFound: boolean = true,
-  save: boolean = true
+  createIfNotFound: boolean = true
 ): Market {
   let market = Market.load(id);
 
   if (market == null && createIfNotFound) {
     market = new Market(id);
-
-    if (save) {
-      market.save();
-    }
   }
 
   return market as Market;
+}
+
+export function getOrCreateUser(
+  id: String,
+  createIfNotFound: boolean = true,
+  save: boolean = true
+): User {
+  let user = User.load(id);
+
+  if (user == null && createIfNotFound) {
+    user = new User(id);
+
+    if (save) {
+      user.save();
+    }
+  }
+
+  return user as User;
 }

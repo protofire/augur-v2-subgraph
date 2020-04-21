@@ -28,6 +28,8 @@ dataSources:
           handler: handleMarketFinalized
         - event: MarketTransferred(indexed address,indexed address,address,address)
           handler: handleMarketTransferred
+        - event: MarketMigrated(indexed address,indexed address,indexed address)
+          handler: handleMarketMigrated
         - event: UniverseCreated(indexed address,indexed address,uint256[],uint256)
           handler: handleUniverseCreated
         - event: UniverseForked(indexed address,address)

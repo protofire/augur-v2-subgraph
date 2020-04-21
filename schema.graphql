@@ -1,7 +1,29 @@
 type Universe @entity {
   id: ID!
+
+  parentUniverse: Universe
+
+  payoutNumerators: [BigInt!]
+
+  creationTimestamp: BigInt
+
+  markets: [Market!]! @derivedFrom(field: "universe")
+
+  children: [Universe!]! @derivedFrom(field: "parentUniverse")
 }
 
 type Market @entity {
   id: ID!
+
+  universe: Universe!
+
+  creator: User!
+
+  owner: User!
+}
+
+type User @entity {
+  id: ID!
+
+  marketsCreated: [Market!]! @derivedFrom(field: "creator")
 }
