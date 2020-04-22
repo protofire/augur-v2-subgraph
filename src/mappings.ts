@@ -12,7 +12,16 @@ import {
   getOrCreateUser,
   getOrCreateMarket
 } from "./utils/helpers";
-import { ZERO_ADDRESS, BIGINT_ONE, BIGINT_ZERO } from "./utils/constants";
+import {
+  ZERO_ADDRESS,
+  BIGINT_ONE,
+  BIGINT_ZERO,
+  STATUS_SETTLED,
+  STATUS_TRADING,
+  STATUS_DISPUTING,
+  STATUS_FINALIZED,
+  STATUS_REPORTING
+} from "./utils/constants";
 import { toDecimal } from "./utils/decimals";
 
 // - event: MarketCreated(indexed address,uint256,string,address,indexed address,address,uint256,int256[],uint8,uint256,bytes32[],uint256,uint256)
@@ -27,10 +36,23 @@ export function handleMarketCreated(event: MarketCreated): void {
   let universe = getOrCreateUniverse(event.params.universe.toHexString());
   let market = getOrCreateMarket(event.params.market.toHexString());
   let creator = getOrCreateUser(event.params.marketCreator.toHexString());
+  let designatedReporter = getOrCreateUser(
+    event.params.designatedReporter.toHexString()
+  );
 
   market.creator = creator.id;
   market.universe = universe.id;
   market.owner = creator.id;
+  market.extraInfo = event.params.extraInfo;
+  market.numTicks = event.params.numTicks;
+  market.designatedReporter = designatedReporter.id;
+  market.endTimestamp = event.params.endTime;
+  market.prices = event.params.prices;
+  market.marketType = event.params.marketType;
+  market.outcomes = event.params.outcomes;
+  market.timestamp = event.params.timestamp;
+  market.noShowBond = event.params.noShowBond;
+  market.status = STATUS_TRADING;
   market.save();
 
   universe.save();
@@ -43,7 +65,12 @@ export function handleMarketCreated(event: MarketCreated): void {
 
 // MarketFinalized(address universe, address market, uint256 timestamp, uint256[] winningPayoutNumerators)
 
-export function handleMarketFinalized(event: MarketFinalized): void {}
+export function handleMarketFinalized(event: MarketFinalized): void {
+  let market = getOrCreateMarket(event.params.market.toHexString());
+
+  market.status = STATUS_FINALIZED;
+  market.save();
+}
 
 // - event: MarketTransferred(indexed address,indexed address,address,address)
 //   handler: handleMarketTransferred
@@ -65,7 +92,20 @@ export function handleMarketTransferred(event: MarketTransferred): void {
 
 // MarketMigrated(address market, address originalUniverse, address newUniverse)
 
-export function handleMarketMigrated(event: MarketMigrated): void {}
+export function handleMarketMigrated(event: MarketMigrated): void {
+  let market = getOrCreateMarket(event.params.market.toHexString());
+  let originalUniverse = getOrCreateUniverse(
+    event.params.originalUniverse.toHexString()
+  );
+  let newUniverse = getOrCreateUniverse(event.params.newUniverse.toHexString());
+
+  market.universe = newUniverse.id;
+  market.save();
+
+  originalUniverse.save();
+
+  newUniverse.save();
+}
 
 // - event: UniverseCreated(indexed address,indexed address,uint256[],uint256)
 //   handler: handleUniverseCreated

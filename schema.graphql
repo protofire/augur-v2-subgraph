@@ -1,3 +1,7 @@
+enum MarketStatus {
+  TRADING, REPORTING, DISPUTING, FINALIZED, SETTLED
+}
+
 type Universe @entity {
   id: ID!
 
@@ -20,10 +24,32 @@ type Market @entity {
   creator: User!
 
   owner: User!
+
+  extraInfo: String!
+
+  numTicks: BigInt!
+
+  designatedReporter: User!
+
+  endTimestamp: BigInt!
+
+  prices: [BigInt!]!
+
+  marketType: Int!
+
+  outcomes: [Bytes!]!
+
+  timestamp: BigInt!
+
+  noShowBond: BigInt!
+
+  status: MarketStatus!
 }
 
 type User @entity {
   id: ID!
 
   marketsCreated: [Market!]! @derivedFrom(field: "creator")
+
+  marketsAsReporter: [Market!]! @derivedFrom(field: "designatedReporter")
 }
