@@ -1,5 +1,17 @@
 enum MarketStatus {
-  TRADING, REPORTING, DISPUTING, FINALIZED, SETTLED
+  TRADING
+  REPORTING
+  DISPUTING
+  FINALIZED
+  SETTLED
+}
+
+type User @entity {
+  id: ID!
+
+  marketsCreated: [Market!]! @derivedFrom(field: "creator")
+
+  marketsAsReporter: [Market!]! @derivedFrom(field: "designatedReporter")
 }
 
 type Universe @entity {
@@ -44,12 +56,66 @@ type Market @entity {
   noShowBond: BigInt!
 
   status: MarketStatus!
+
+  events: [MarketEvent!]! @derivedFrom(field: "market")
 }
 
-type User @entity {
+interface MarketEvent {
   id: ID!
 
-  marketsCreated: [Market!]! @derivedFrom(field: "creator")
+  market: Market!
 
-  marketsAsReporter: [Market!]! @derivedFrom(field: "designatedReporter")
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+}
+
+type TransferMarketEvent implements MarketEvent @entity {
+  id: ID!
+
+  market: Market!
+
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+}
+
+type MigrateMarketEvent implements MarketEvent @entity {
+  id: ID!
+
+  market: Market!
+
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+}
+
+type CreateMarketEvent implements MarketEvent @entity {
+  id: ID!
+
+  market: Market!
+
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+}
+
+type FinalizeMarketEvent implements MarketEvent @entity {
+  id: ID!
+
+  market: Market!
+
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
 }

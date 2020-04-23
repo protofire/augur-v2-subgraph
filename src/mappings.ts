@@ -10,7 +10,11 @@ import {
 import {
   getOrCreateUniverse,
   getOrCreateUser,
-  getOrCreateMarket
+  getOrCreateMarket,
+  createAndSaveCreateMarketEvent,
+  createAndSaveMigrateMarketEvent,
+  createAndSaveTransferMarketEvent,
+  createAndSaveFinalizeMarketEvent
 } from "./utils/helpers";
 import {
   ZERO_ADDRESS,
@@ -58,6 +62,8 @@ export function handleMarketCreated(event: MarketCreated): void {
   universe.save();
 
   creator.save();
+
+  createAndSaveCreateMarketEvent(event);
 }
 
 // - event: MarketFinalized(indexed address,indexed address,uint256,uint256[])
@@ -70,6 +76,8 @@ export function handleMarketFinalized(event: MarketFinalized): void {
 
   market.status = STATUS_FINALIZED;
   market.save();
+
+  createAndSaveFinalizeMarketEvent(event);
 }
 
 // - event: MarketTransferred(indexed address,indexed address,address,address)
@@ -85,6 +93,8 @@ export function handleMarketTransferred(event: MarketTransferred): void {
   market.save();
 
   newOwner.save();
+
+  createAndSaveTransferMarketEvent(event);
 }
 
 // - event: MarketMigrated(indexed address,indexed address,address)
@@ -105,6 +115,8 @@ export function handleMarketMigrated(event: MarketMigrated): void {
   originalUniverse.save();
 
   newUniverse.save();
+
+  createAndSaveMigrateMarketEvent(event);
 }
 
 // - event: UniverseCreated(indexed address,indexed address,uint256[],uint256)

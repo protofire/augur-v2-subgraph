@@ -1,4 +1,18 @@
-import { Universe, Market, User } from "../../generated/schema";
+import {
+  Universe,
+  Market,
+  User,
+  MigrateMarketEvent,
+  FinalizeMarketEvent,
+  CreateMarketEvent,
+  TransferMarketEvent
+} from "../../generated/schema";
+import {
+  MarketCreated,
+  MarketTransferred,
+  MarketMigrated,
+  MarketFinalized
+} from "../../generated/Augur/Augur";
 import {
   Address,
   EthereumEvent,
@@ -56,4 +70,67 @@ export function getOrCreateUser(
   }
 
   return user as User;
+}
+
+export function createAndSaveCreateMarketEvent(
+  ethereumEvent: MarketCreated
+): void {
+  let id = getEventId(ethereumEvent);
+  let event = new CreateMarketEvent(id);
+
+  event.market = ethereumEvent.params.market.toHexString();
+  event.timestamp = ethereumEvent.block.timestamp;
+  event.block = ethereumEvent.block.number;
+  event.tx_hash = ethereumEvent.transaction.hash.toHexString();
+
+  event.save();
+}
+
+export function createAndSaveFinalizeMarketEvent(
+  ethereumEvent: MarketFinalized
+): void {
+  let id = getEventId(ethereumEvent);
+  let event = new FinalizeMarketEvent(id);
+
+  event.market = ethereumEvent.params.market.toHexString();
+  event.timestamp = ethereumEvent.block.timestamp;
+  event.block = ethereumEvent.block.number;
+  event.tx_hash = ethereumEvent.transaction.hash.toHexString();
+
+  event.save();
+}
+
+export function createAndSaveTransferMarketEvent(
+  ethereumEvent: MarketTransferred
+): void {
+  let id = getEventId(ethereumEvent);
+  let event = new TransferMarketEvent(id);
+
+  event.market = ethereumEvent.params.market.toHexString();
+  event.timestamp = ethereumEvent.block.timestamp;
+  event.block = ethereumEvent.block.number;
+  event.tx_hash = ethereumEvent.transaction.hash.toHexString();
+
+  event.save();
+}
+
+export function createAndSaveMigrateMarketEvent(
+  ethereumEvent: MarketMigrated
+): void {
+  let id = getEventId(ethereumEvent);
+  let event = new MigrateMarketEvent(id);
+
+  event.market = ethereumEvent.params.market.toHexString();
+  event.timestamp = ethereumEvent.block.timestamp;
+  event.block = ethereumEvent.block.number;
+  event.tx_hash = ethereumEvent.transaction.hash.toHexString();
+
+  event.save();
+}
+
+export function getEventId(event: EthereumEvent): String {
+  return event.transaction.hash
+    .toHexString()
+    .concat("-")
+    .concat(event.logIndex.toHexString());
 }
