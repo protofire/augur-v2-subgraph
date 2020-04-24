@@ -82,6 +82,18 @@ export function createAndSaveCreateMarketEvent(
   event.timestamp = ethereumEvent.block.timestamp;
   event.block = ethereumEvent.block.number;
   event.tx_hash = ethereumEvent.transaction.hash.toHexString();
+  event.universe = ethereumEvent.params.universe.toHexString();
+  event.endTime = ethereumEvent.params.endTime;
+  event.extraInfo = ethereumEvent.params.extraInfo;
+  event.marketCreator = ethereumEvent.params.marketCreator.toHexString();
+  event.designatedReporter = ethereumEvent.params.designatedReporter.toHexString();
+  event.feePerCashInAttoCash = ethereumEvent.params.feePerCashInAttoCash;
+  event.prices = ethereumEvent.params.prices;
+  event.marketType = ethereumEvent.params.marketType;
+  event.numTicks = ethereumEvent.params.numTicks;
+  event.outcomes = ethereumEvent.params.outcomes;
+  event.noShowBond = ethereumEvent.params.noShowBond;
+  event.creationTimestamp = ethereumEvent.params.timestamp;
 
   event.save();
 }
@@ -96,6 +108,8 @@ export function createAndSaveFinalizeMarketEvent(
   event.timestamp = ethereumEvent.block.timestamp;
   event.block = ethereumEvent.block.number;
   event.tx_hash = ethereumEvent.transaction.hash.toHexString();
+  event.finalizeTimestamp = ethereumEvent.params.timestamp;
+  event.winningPayoutNumerators = ethereumEvent.params.winningPayoutNumerators;
 
   event.save();
 }
@@ -111,6 +125,10 @@ export function createAndSaveTransferMarketEvent(
   event.block = ethereumEvent.block.number;
   event.tx_hash = ethereumEvent.transaction.hash.toHexString();
 
+  event.universe = ethereumEvent.params.universe.toHexString();
+  event.from = ethereumEvent.params.from.toHexString();
+  event.to = ethereumEvent.params.to.toHexString();
+
   event.save();
 }
 
@@ -124,6 +142,9 @@ export function createAndSaveMigrateMarketEvent(
   event.timestamp = ethereumEvent.block.timestamp;
   event.block = ethereumEvent.block.number;
   event.tx_hash = ethereumEvent.transaction.hash.toHexString();
+
+  event.originalUniverse = ethereumEvent.params.originalUniverse.toHexString();
+  event.newUniverse = ethereumEvent.params.newUniverse.toHexString();
 
   event.save();
 }

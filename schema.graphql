@@ -82,6 +82,12 @@ type TransferMarketEvent implements MarketEvent @entity {
   block: BigInt!
 
   tx_hash: String!
+
+  universe: Universe!
+
+  from: User!
+
+  to: User!
 }
 
 type MigrateMarketEvent implements MarketEvent @entity {
@@ -94,6 +100,10 @@ type MigrateMarketEvent implements MarketEvent @entity {
   block: BigInt!
 
   tx_hash: String!
+
+  originalUniverse: Universe!
+
+  newUniverse: Universe!
 }
 
 type CreateMarketEvent implements MarketEvent @entity {
@@ -106,6 +116,30 @@ type CreateMarketEvent implements MarketEvent @entity {
   block: BigInt!
 
   tx_hash: String!
+
+  universe: Universe!
+
+  endTime: BigInt!
+
+  extraInfo: String!
+
+  marketCreator: User!
+
+  designatedReporter: User!
+
+  feePerCashInAttoCash: BigInt!
+
+  prices: [BigInt!]!
+
+  marketType: Int!
+
+  numTicks: BigInt!
+
+  outcomes: [Bytes!]!
+
+  noShowBond: BigInt!
+
+  creationTimestamp: BigInt!
 }
 
 type FinalizeMarketEvent implements MarketEvent @entity {
@@ -118,4 +152,8 @@ type FinalizeMarketEvent implements MarketEvent @entity {
   block: BigInt!
 
   tx_hash: String!
+
+  finalizeTimestamp: BigInt!
+
+  winningPayoutNumerators: [BigInt!]!
 }
