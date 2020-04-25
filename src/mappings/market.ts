@@ -3,10 +3,8 @@ import {
   MarketCreated,
   MarketTransferred,
   MarketMigrated,
-  MarketFinalized,
-  UniverseCreated,
-  UniverseForked
-} from "../generated/Augur/Augur";
+  MarketFinalized
+} from "../../generated/Augur/Augur";
 import {
   getOrCreateUniverse,
   getOrCreateUser,
@@ -15,7 +13,7 @@ import {
   createAndSaveMigrateMarketEvent,
   createAndSaveTransferMarketEvent,
   createAndSaveFinalizeMarketEvent
-} from "./utils/helpers";
+} from "../utils/helpers";
 import {
   ZERO_ADDRESS,
   BIGINT_ONE,
@@ -25,8 +23,8 @@ import {
   STATUS_DISPUTING,
   STATUS_FINALIZED,
   STATUS_REPORTING
-} from "./utils/constants";
-import { toDecimal } from "./utils/decimals";
+} from "../utils/constants";
+import { toDecimal } from "../utils/decimals";
 
 // - event: MarketCreated(indexed address,uint256,string,address,indexed address,address,uint256,int256[],uint8,uint256,bytes32[],uint256,uint256)
 //   handler: handleMarketCreated
@@ -118,34 +116,3 @@ export function handleMarketMigrated(event: MarketMigrated): void {
 
   createAndSaveMigrateMarketEvent(event);
 }
-
-// - event: UniverseCreated(indexed address,indexed address,uint256[],uint256)
-//   handler: handleUniverseCreated
-
-// UniverseCreated(address parentUniverse, address childUniverse, uint256[] payoutNumerators, uint256 creationTimestamp)
-
-export function handleUniverseCreated(event: UniverseCreated): void {
-  let childUniverse = getOrCreateUniverse(
-    event.params.childUniverse.toHexString()
-  );
-
-  if (event.params.parentUniverse.toHexString() != ZERO_ADDRESS) {
-    let parentUniverse = getOrCreateUniverse(
-      event.params.parentUniverse.toHexString()
-    );
-    parentUniverse.save();
-
-    childUniverse.parentUniverse = parentUniverse.id;
-  }
-
-  childUniverse.payoutNumerators = event.params.payoutNumerators;
-  childUniverse.creationTimestamp = event.params.creationTimestamp;
-  childUniverse.save();
-}
-
-// - event: UniverseForked(indexed address,address)
-//   handler: handleUniverseForked
-
-// UniverseForked(address universe, contract IMarket forkingMarket)
-
-export function handleUniverseForked(event: UniverseForked): void {}

@@ -21,7 +21,20 @@ type Universe @entity {
 
   payoutNumerators: [BigInt!]
 
+  "Universe creation timestamp"
   creationTimestamp: BigInt
+
+  "Latest universal value for the noShowBond charged on market creation"
+  noShowBond: BigInt
+
+  "Latest universal value for the validityBond charged on market creation"
+  validityBond: BigInt
+
+  "Latest universal value for the reporting fee charged on settlements"
+  reportingFee: BigInt
+
+  "Latest warpSync file hash"
+  warpSyncHash: BigInt
 
   markets: [Market!]! @derivedFrom(field: "universe")
 
@@ -37,12 +50,16 @@ type Market @entity {
 
   owner: User!
 
+  "Extra information in JSON format"
   extraInfo: String!
 
+  "Number of Ticks in a complete set"
   numTicks: BigInt!
 
+  "Designated user that should report the "
   designatedReporter: User!
 
+  "Timestamp depicting the end of the real world event for that market"
   endTimestamp: BigInt!
 
   prices: [BigInt!]!
@@ -51,10 +68,13 @@ type Market @entity {
 
   outcomes: [Bytes!]!
 
+  "Creation timestamp"
   timestamp: BigInt!
 
+  "NoShowBond payed on creation"
   noShowBond: BigInt!
 
+  "Current status of the market"
   status: MarketStatus!
 
   events: [MarketEvent!]! @derivedFrom(field: "market")
