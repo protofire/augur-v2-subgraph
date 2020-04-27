@@ -42,6 +42,17 @@ dataSources:
           handler: handleValidityBondChanged
         - event: WarpSyncDataUpdated(indexed address,uint256,uint256)
           handler: handleWarpSyncDataUpdated
+        - event: TokensMinted(indexed address,indexed address,indexed address,uint256,uint8,address,uint256)
+          handler: handleTokensMinted
+        - event: TokensBurned(indexed address,indexed address,indexed address,uint256,uint8,address,uint256)
+          handler: handleTokensBurned
+        - event: TokensTransferred(indexed address,address,indexed address,indexed address,uint256,uint8,address)
+          handler: handleTokensTransferred
+        - event: TokenBalanceChanged(indexed address,indexed address,address,uint8,address,uint256,uint256)
+          handler: handleTokenBalanceChanged
+        - event: ShareTokenBalanceChanged(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleShareTokenBalanceChanged
+
 # Markets
   # DONE MarketCreated(indexed address,uint256,string,address,indexed address,address,uint256,int256[],uint8,uint256,bytes32[],uint256,uint256)
   # DONE MarketFinalized(indexed address,indexed address,uint256,uint256[])
@@ -54,6 +65,7 @@ dataSources:
     # - CompleteSetsPurchased(indexed address,indexed address,indexed address,uint256,uint256)
     # - CompleteSetsSold(indexed address,indexed address,indexed address,uint256,uint256,uint256)
   # Tokens
+    # DONE ShareTokenBalanceChanged(indexed address,indexed address,indexed address,uint256,uint256)
     # - TokenBalanceChanged(indexed address,indexed address,address,uint8,address,uint256,uint256)
     # - TokensBurned(indexed address,indexed address,indexed address,uint256,uint8,address,uint256)
     # - TokensMinted(indexed address,indexed address,indexed address,uint256,uint8,address,uint256)
@@ -72,11 +84,11 @@ dataSources:
 # Universe
   # DONE UniverseCreated(indexed address,indexed address,uint256[],uint256)
   # DONE UniverseForked(indexed address,address)
-  # - ReportingFeeChanged(indexed address,uint256)
+  # DONE ReportingFeeChanged(indexed address,uint256)
   # - DesignatedReportStakeChanged(indexed address,uint256)
-  # - NoShowBondChanged(indexed address,uint256)
-  # - ValidityBondChanged(indexed address,uint256)
-  # - WarpSyncDataUpdated(indexed address,uint256,uint256)
+  # DONE NoShowBondChanged(indexed address,uint256)
+  # DONE ValidityBondChanged(indexed address,uint256)
+  # DONE WarpSyncDataUpdated(indexed address,uint256,uint256)
 # General
   # - FinishDeployment()
   # - RegisterContract(address,bytes32)
@@ -84,5 +96,4 @@ dataSources:
 
 
 
-  # - ShareTokenBalanceChanged(indexed address,indexed address,indexed address,uint256,uint256)
   # - TradingProceedsClaimed(indexed address,indexed address,address,uint256,uint256,uint256,uint256,uint256)

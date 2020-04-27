@@ -14,3 +14,11 @@ export {
   handleValidityBondChanged,
   handleWarpSyncDataUpdated
 } from "./mappings/universe";
+
+export {
+  handleTokensMinted,
+  handleTokensBurned,
+  handleTokensTransferred,
+  handleTokenBalanceChanged,
+  handleShareTokenBalanceChanged
+} from "./mappings/token";

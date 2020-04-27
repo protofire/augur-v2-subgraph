@@ -5,7 +5,8 @@ import {
   MigrateMarketEvent,
   FinalizeMarketEvent,
   CreateMarketEvent,
-  TransferMarketEvent
+  TransferMarketEvent,
+  ShareToken
 } from "../../generated/schema";
 import {
   MarketCreated,
@@ -25,7 +26,9 @@ import {
   ZERO_ADDRESS,
   BIGINT_ZERO,
   BIGINT_ONE,
-  BIGDECIMAL_ZERO
+  BIGDECIMAL_ZERO,
+  marketTypes,
+  tokenTypes
 } from "./constants";
 
 export function getOrCreateUniverse(
@@ -70,6 +73,36 @@ export function getOrCreateUser(
   }
 
   return user as User;
+}
+
+export function getOrCreateUserTokenBalance(
+  id: String,
+  createIfNotFound: boolean = true
+): UserTokenBalance {
+  let balance = UserTokenBalance.load(id);
+
+  if (balance == null && createIfNotFound) {
+    balance = new UserTokenBalance(id);
+
+    balance.balance = BIGINT_ZERO;
+  }
+
+  return balance as UserTokenBalance;
+}
+
+export function getOrCreateShareToken(
+  id: String,
+  createIfNotFound: boolean = true
+): ShareToken {
+  let token = ShareToken.load(id);
+
+  if (token == null && createIfNotFound) {
+    token = new ShareToken(id);
+
+    token.balance = BIGINT_ZERO;
+  }
+
+  return token as ShareToken;
 }
 
 export function createAndSaveCreateMarketEvent(
@@ -154,4 +187,12 @@ export function getEventId(event: EthereumEvent): String {
     .toHexString()
     .concat("-")
     .concat(event.logIndex.toHexString());
+}
+
+export function getMarketTypeFromInt(numericalType: Integer): String {
+  return marketTypes[numericalType];
+}
+
+export function getTokenTypeFromInt(numericalType: Integer): String {
+  return tokenTypes[numericalType];
 }

@@ -12,6 +12,8 @@ type User @entity {
   marketsCreated: [Market!]! @derivedFrom(field: "creator")
 
   marketsAsReporter: [Market!]! @derivedFrom(field: "designatedReporter")
+
+  shareTokens: [ShareToken!]! @derivedFrom(field: "owner")
 }
 
 type Universe @entity {
@@ -78,6 +80,8 @@ type Market @entity {
   status: MarketStatus!
 
   events: [MarketEvent!]! @derivedFrom(field: "market")
+
+  shareTokens: [ShareToken!]! @derivedFrom(field: "market")
 }
 
 interface MarketEvent {
@@ -176,4 +180,16 @@ type FinalizeMarketEvent implements MarketEvent @entity {
   finalizeTimestamp: BigInt!
 
   winningPayoutNumerators: [BigInt!]!
+}
+
+type ShareToken @entity {
+  id: ID!
+
+  owner: User!
+
+  balance: BigInt!
+
+  outcome: BigInt!
+
+  market: Market!
 }
