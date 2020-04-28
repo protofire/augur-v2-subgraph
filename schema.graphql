@@ -15,6 +15,8 @@ enum MarketType {
 type User @entity {
   id: ID!
 
+  userTokenBalances: [UserTokenBalance!]! @derivedFrom(field: "user")
+
   marketsCreated: [Market!]! @derivedFrom(field: "creator")
 
   marketsAsReporter: [Market!]! @derivedFrom(field: "designatedReporter")
@@ -221,4 +223,106 @@ type ShareToken @entity {
   outcome: BigInt!
 
   market: Market!
+}
+
+interface TokenEvent {
+  id: ID!
+
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+
+  token: String!
+
+  userTokenBalance: UserTokenBalance!
+
+  amount: BigInt!
+}
+
+type TokenMintedEvent @entity {
+  id: ID!
+
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+
+  token: String!
+
+  userTokenBalance: UserTokenBalance!
+
+  amount: BigInt!
+}
+
+type TokenBurnedEvent @entity {
+  id: ID!
+
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+
+  token: String!
+
+  userTokenBalance: UserTokenBalance!
+
+  amount: BigInt!
+}
+
+type TokenBalanceChangedEvent @entity {
+  id: ID!
+
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+
+  token: String!
+
+  userTokenBalance: UserTokenBalance!
+
+  amount: BigInt!
+}
+
+type TokenTransferredEvent @entity {
+  id: ID!
+
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+
+  token: String!
+
+  userTokenBalance: UserTokenBalance!
+
+  amount: BigInt!
+
+  relatedEvent: TokenTransferredEvent
+}
+
+interface UserTokenBalance {
+  id: ID!
+
+  user: User!
+  
+  balance: BigInt!
+
+  events: [TokenEvent!]!
+}
+
+type UserReputationTokenBalance implements UserTokenBalance @entity {
+  id: ID!
+
+  user: User!
+
+  balance: BigInt!
+
+  events: [TokenEvent!]! @derivedFrom(field: "userTokenBalance")
 }

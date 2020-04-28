@@ -7,14 +7,23 @@ import {
   CreateMarketEvent,
   TransferMarketEvent,
   OIChangeMarketEvent,
-  ShareToken
+  ShareToken,
+  UserReputationTokenBalance,
+  TokenMintedEvent,
+  TokenBurnedEvent,
+  TokenTransferredEvent,
+  TokenBalanceChangedEvent
 } from "../../generated/schema";
 import {
   MarketCreated,
   MarketTransferred,
   MarketMigrated,
   MarketFinalized,
-  MarketOIChanged
+  MarketOIChanged,
+  TokensMinted,
+  TokensBurned,
+  TokensTransferred,
+  TokenBalanceChanged
 } from "../../generated/Augur/Augur";
 import {
   Address,
@@ -106,6 +115,8 @@ export function getOrCreateShareToken(
 
   return token as ShareToken;
 }
+
+// Market events
 
 export function createAndSaveCreateMarketEvent(
   ethereumEvent: MarketCreated
@@ -214,4 +225,98 @@ export function getMarketTypeFromInt(numericalType: i32): String {
 
 export function getTokenTypeFromInt(numericalType: i32): String {
   return tokenTypes[numericalType];
+}
+
+// Token events
+
+export function createAndSaveTokenMintedEvent(
+  ethereumEvent: TokensMinted
+): void {
+  let id = getEventId(ethereumEvent);
+  let event = new TokenMintedEvent(id);
+
+  event.timestamp = ethereumEvent.block.timestamp;
+  event.block = ethereumEvent.block.number;
+  event.tx_hash = ethereumEvent.transaction.hash.toHexString();
+  event.token = ethereumEvent.params.token.toHexString()
+  event.userTokenBalance = ethereumEvent.params.target.toHexString();
+  event.amount = ethereumEvent.params.amount;
+
+  event.save();
+}
+
+export function createAndSaveTokenBurnedEvent(
+  ethereumEvent: TokensBurned
+): void {
+  let id = getEventId(ethereumEvent);
+  let event = new TokenBurnedEvent(id);
+
+  event.timestamp = ethereumEvent.block.timestamp;
+  event.block = ethereumEvent.block.number;
+  event.tx_hash = ethereumEvent.transaction.hash.toHexString();
+  event.token = ethereumEvent.params.token.toHexString()
+  event.userTokenBalance = ethereumEvent.params.target.toHexString();
+  event.amount = ethereumEvent.params.amount;
+
+  event.save();
+}
+
+export function createAndSaveTokenTransferredEvents(
+  ethereumEvent: TokensTransferred
+): void {
+  let idFrom = getEventId(ethereumEvent).concat('-FROM');
+  let idTo = getEventId(ethereumEvent).concat('-TO');
+  let eventFrom = new TokenTransferredEvent(idFrom);
+  let eventTo = new TokenTransferredEvent(idTo);
+
+  eventFrom.timestamp = ethereumEvent.block.timestamp;
+  eventFrom.block = ethereumEvent.block.number;
+  eventFrom.tx_hash = ethereumEvent.transaction.hash.toHexString();
+  eventFrom.token = ethereumEvent.params.token.toHexString()
+  eventFrom.userTokenBalance = ethereumEvent.params.from.toHexString();
+  eventFrom.amount = ethereumEvent.params.value;
+  eventFrom.relatedEvent = eventTo.id;
+
+  eventTo.timestamp = ethereumEvent.block.timestamp;
+  eventTo.block = ethereumEvent.block.number;
+  eventTo.tx_hash = ethereumEvent.transaction.hash.toHexString();
+  eventTo.token = ethereumEvent.params.token.toHexString()
+  eventTo.userTokenBalance = ethereumEvent.params.to.toHexString();
+  eventTo.amount = ethereumEvent.params.value;
+  eventTo.relatedEvent = eventFrom.id;
+
+  eventFrom.save();
+  eventTo.save();
+}
+
+export function createAndSaveTokenBalanceChangedEvent(
+  ethereumEvent: TokenBalanceChanged
+): void {
+  let id = getEventId(ethereumEvent);
+  let event = new TokenBalanceChangedEvent(id);
+
+  event.timestamp = ethereumEvent.block.timestamp;
+  event.block = ethereumEvent.block.number;
+  event.tx_hash = ethereumEvent.transaction.hash.toHexString();
+  event.token = ethereumEvent.params.token.toHexString()
+  event.userTokenBalance = ethereumEvent.params.owner.toHexString();
+  event.amount = ethereumEvent.params.balance;
+
+  event.save();
+}
+
+export function getOrCreateUserReputationTokenBalance(
+  id: String,
+  createIfNotFound: boolean = true
+): UserReputationTokenBalance {
+  let tokenBalance = UserReputationTokenBalance.load(id);
+
+  if (tokenBalance == null && createIfNotFound) {
+    tokenBalance = new UserReputationTokenBalance(id);
+
+    tokenBalance.balance = BIGINT_ZERO;
+    tokenBalance.user = id;
+  }
+
+  return tokenBalance as UserReputationTokenBalance;
 }
