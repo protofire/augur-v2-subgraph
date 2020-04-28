@@ -13,7 +13,8 @@ export {
   handleReportingFeeChanged,
   handleReportingFeeChanged,
   handleValidityBondChanged,
-  handleWarpSyncDataUpdated
+  handleWarpSyncDataUpdated,
+  handleDesignatedReportStakeChanged
 } from "./mappings/universe";
 
 export {

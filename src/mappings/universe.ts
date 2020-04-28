@@ -5,7 +5,8 @@ import {
   ReportingFeeChanged,
   ValidityBondChanged,
   NoShowBondChanged,
-  WarpSyncDataUpdated
+  WarpSyncDataUpdated,
+  DesignatedReportStakeChanged
 } from "../../generated/Augur/Augur";
 import { getOrCreateUniverse } from "../utils/helpers";
 import { ZERO_ADDRESS, BIGINT_ONE, BIGINT_ZERO } from "../utils/constants";
@@ -49,6 +50,16 @@ export function handleReportingFeeChanged(event: ReportingFeeChanged): void {
   let universe = getOrCreateUniverse(event.params.universe.toHexString());
 
   universe.reportingFee = event.params.reportingFee;
+  universe.save();
+}
+
+// - event: DesignatedReportStakeChanged(indexed address,uint256)
+//   handler: handleDesignatedReportStakeChanged
+
+export function handleDesignatedReportStakeChanged(event: DesignatedReportStakeChanged): void {
+  let universe = getOrCreateUniverse(event.params.universe.toHexString());
+
+  universe.designatedReportStake = event.params.designatedReportStake;
   universe.save();
 }
 

@@ -41,6 +41,9 @@ type Universe @entity {
   "Latest universal value for the reporting fee charged on settlements"
   reportingFee: BigInt
 
+  "Latest universal value for the value a designated reported is required to stake on the initial report"
+  designatedReportStake: BigInt
+
   "Latest warpSync file hash"
   warpSyncHash: BigInt
 

@@ -38,6 +38,8 @@ dataSources:
           handler: handleUniverseForked
         - event: ReportingFeeChanged(indexed address,uint256)
           handler: handleReportingFeeChanged
+        - event: DesignatedReportStakeChanged(indexed address,uint256)
+          handler: handleDesignatedReportStakeChanged
         - event: NoShowBondChanged(indexed address,uint256)
           handler: handleNoShowBondChanged
         - event: ValidityBondChanged(indexed address,uint256)
@@ -63,6 +65,7 @@ dataSources:
   # DONE MarketOIChanged(indexed address,indexed address,uint256)
   # - MarketParticipantsDisavowed(indexed address,indexed address)
   # - MarketRepBondTransferred(indexed address,address,address,address)
+  # - TradingProceedsClaimed(indexed address,indexed address,address,uint256,uint256,uint256,uint256,uint256)
   # CompleteSets
     # - CompleteSetsPurchased(indexed address,indexed address,indexed address,uint256,uint256)
     # - CompleteSetsSold(indexed address,indexed address,indexed address,uint256,uint256,uint256)
@@ -87,7 +90,7 @@ dataSources:
   # DONE UniverseCreated(indexed address,indexed address,uint256[],uint256)
   # DONE UniverseForked(indexed address,address)
   # DONE ReportingFeeChanged(indexed address,uint256)
-  # - DesignatedReportStakeChanged(indexed address,uint256)
+  # DONE DesignatedReportStakeChanged(indexed address,uint256)
   # DONE NoShowBondChanged(indexed address,uint256)
   # DONE ValidityBondChanged(indexed address,uint256)
   # DONE WarpSyncDataUpdated(indexed address,uint256,uint256)
@@ -95,7 +98,3 @@ dataSources:
   # - FinishDeployment()
   # - RegisterContract(address,bytes32)
   # - TimestampSet(uint256)
-
-
-
-  # - TradingProceedsClaimed(indexed address,indexed address,address,uint256,uint256,uint256,uint256,uint256)
