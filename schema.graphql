@@ -6,6 +6,12 @@ enum MarketStatus {
   SETTLED
 }
 
+enum MarketType {
+  YES_NO,
+  CATEGORICAL,
+  SCALAR
+}
+
 type User @entity {
   id: ID!
 
@@ -66,7 +72,9 @@ type Market @entity {
 
   prices: [BigInt!]!
 
-  marketType: Int!
+  marketTypeRaw: Int!
+
+  marketType: MarketType!
 
   outcomes: [Bytes!]!
 
@@ -78,6 +86,8 @@ type Market @entity {
 
   "Current status of the market"
   status: MarketStatus!
+
+  openInterest: BigInt
 
   events: [MarketEvent!]! @derivedFrom(field: "market")
 
@@ -155,7 +165,9 @@ type CreateMarketEvent implements MarketEvent @entity {
 
   prices: [BigInt!]!
 
-  marketType: Int!
+  marketTypeRaw: Int!
+
+  marketType: MarketType!
 
   numTicks: BigInt!
 
@@ -180,6 +192,20 @@ type FinalizeMarketEvent implements MarketEvent @entity {
   finalizeTimestamp: BigInt!
 
   winningPayoutNumerators: [BigInt!]!
+}
+
+type OIChangeMarketEvent implements MarketEvent @entity {
+  id: ID!
+
+  market: Market!
+
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+
+  openInterest: BigInt!
 }
 
 type ShareToken @entity {

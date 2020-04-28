@@ -3,7 +3,8 @@ import {
   MarketCreated,
   MarketTransferred,
   MarketMigrated,
-  MarketFinalized
+  MarketFinalized,
+  MarketOIChanged
 } from "../../generated/Augur/Augur";
 import {
   getOrCreateUniverse,
@@ -12,7 +13,9 @@ import {
   createAndSaveCreateMarketEvent,
   createAndSaveMigrateMarketEvent,
   createAndSaveTransferMarketEvent,
-  createAndSaveFinalizeMarketEvent
+  createAndSaveFinalizeMarketEvent,
+  createAndSaveOIChangeMarketEvent,
+  getMarketTypeFromInt
 } from "../utils/helpers";
 import {
   ZERO_ADDRESS,
@@ -50,7 +53,8 @@ export function handleMarketCreated(event: MarketCreated): void {
   market.designatedReporter = designatedReporter.id;
   market.endTimestamp = event.params.endTime;
   market.prices = event.params.prices;
-  market.marketType = event.params.marketType;
+  market.marketTypeRaw = event.params.marketType;
+  market.marketType = getMarketTypeFromInt(event.params.marketType);
   market.outcomes = event.params.outcomes;
   market.timestamp = event.params.timestamp;
   market.noShowBond = event.params.noShowBond;
@@ -115,4 +119,15 @@ export function handleMarketMigrated(event: MarketMigrated): void {
   newUniverse.save();
 
   createAndSaveMigrateMarketEvent(event);
+}
+
+// - event: MarketOIChanged(indexed address,indexed address,uint256)
+//   handler: handleMarketOIChanged
+
+export function handleMarketOIChanged(event: MarketOIChanged): void {
+  let market = getOrCreateMarket(event.params.market.toHexString());
+  market.openInterest = event.params.marketOI;
+  market.save();
+
+  createAndSaveOIChangeMarketEvent(event);
 }

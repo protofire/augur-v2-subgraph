@@ -2,7 +2,8 @@ export {
   handleMarketCreated,
   handleMarketMigrated,
   handleMarketFinalized,
-  handleMarketTransferred
+  handleMarketTransferred,
+  handleMarketOIChanged
 } from "./mappings/market";
 
 export {

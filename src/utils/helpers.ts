@@ -6,13 +6,15 @@ import {
   FinalizeMarketEvent,
   CreateMarketEvent,
   TransferMarketEvent,
+  OIChangeMarketEvent,
   ShareToken
 } from "../../generated/schema";
 import {
   MarketCreated,
   MarketTransferred,
   MarketMigrated,
-  MarketFinalized
+  MarketFinalized,
+  MarketOIChanged
 } from "../../generated/Augur/Augur";
 import {
   Address,
@@ -122,7 +124,8 @@ export function createAndSaveCreateMarketEvent(
   event.designatedReporter = ethereumEvent.params.designatedReporter.toHexString();
   event.feePerCashInAttoCash = ethereumEvent.params.feePerCashInAttoCash;
   event.prices = ethereumEvent.params.prices;
-  event.marketType = ethereumEvent.params.marketType;
+  event.marketTypeRaw = ethereumEvent.params.marketType;
+  event.marketType = getMarketTypeFromInt(ethereumEvent.params.marketType);
   event.numTicks = ethereumEvent.params.numTicks;
   event.outcomes = ethereumEvent.params.outcomes;
   event.noShowBond = ethereumEvent.params.noShowBond;
@@ -182,6 +185,22 @@ export function createAndSaveMigrateMarketEvent(
   event.save();
 }
 
+export function createAndSaveOIChangeMarketEvent(
+  ethereumEvent: MarketOIChanged
+): void {
+  let id = getEventId(ethereumEvent);
+  let event = new OIChangeMarketEvent(id);
+
+  event.market = ethereumEvent.params.market.toHexString();
+  event.timestamp = ethereumEvent.block.timestamp;
+  event.block = ethereumEvent.block.number;
+  event.tx_hash = ethereumEvent.transaction.hash.toHexString();
+
+  event.openInterest = ethereumEvent.params.marketOI;
+
+  event.save();
+}
+
 export function getEventId(event: EthereumEvent): String {
   return event.transaction.hash
     .toHexString()
@@ -189,10 +208,10 @@ export function getEventId(event: EthereumEvent): String {
     .concat(event.logIndex.toHexString());
 }
 
-export function getMarketTypeFromInt(numericalType: Integer): String {
+export function getMarketTypeFromInt(numericalType: i32): String {
   return marketTypes[numericalType];
 }
 
-export function getTokenTypeFromInt(numericalType: Integer): String {
+export function getTokenTypeFromInt(numericalType: i32): String {
   return tokenTypes[numericalType];
 }

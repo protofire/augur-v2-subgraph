@@ -30,6 +30,8 @@ dataSources:
           handler: handleMarketTransferred
         - event: MarketMigrated(indexed address,indexed address,indexed address)
           handler: handleMarketMigrated
+        - event: MarketOIChanged(indexed address,indexed address,uint256)
+          handler: handleMarketOIChanged
         - event: UniverseCreated(indexed address,indexed address,uint256[],uint256)
           handler: handleUniverseCreated
         - event: UniverseForked(indexed address,address)
@@ -58,7 +60,7 @@ dataSources:
   # DONE MarketFinalized(indexed address,indexed address,uint256,uint256[])
   # DONE MarketMigrated(indexed address,indexed address,indexed address)
   # DONE MarketTransferred(indexed address,indexed address,address,address)
-  # - MarketOIChanged(indexed address,indexed address,uint256)
+  # DONE MarketOIChanged(indexed address,indexed address,uint256)
   # - MarketParticipantsDisavowed(indexed address,indexed address)
   # - MarketRepBondTransferred(indexed address,address,address,address)
   # CompleteSets

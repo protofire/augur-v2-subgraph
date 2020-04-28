@@ -8,15 +8,30 @@ import {
 } from "../../generated/Augur/Augur";
 import {
   getOrCreateShareToken,
-  getOrCreateUser
+  getOrCreateUser,
+  getTokenTypeFromInt
 } from "../utils/helpers";
-import { ZERO_ADDRESS, BIGINT_ONE, BIGINT_ZERO } from "../utils/constants";
+import {
+  ZERO_ADDRESS,
+  BIGINT_ONE,
+  BIGINT_ZERO,
+  REPUTATION_TOKEN,
+  PARTICIPATION_TOKEN,
+  DISPUTE_CROWDSOURCER
+} from "../utils/constants";
 import { toDecimal } from "../utils/decimals";
 
 // - event: TokensMinted(indexed address,indexed address,indexed address,uint256,uint8,address,uint256)
 //   handler: handleTokensMinted
 
-export function handleTokensMinted(event: TokensMinted): void {}
+export function handleTokensMinted(event: TokensMinted): void {
+  let tokenType = getTokenTypeFromInt(event.params.tokenType);
+
+  if (tokenType == REPUTATION_TOKEN) {
+  } else if (tokenType == DISPUTE_CROWDSOURCER) {
+  } else if (tokenType == PARTICIPATION_TOKEN) {
+  }
+}
 
 // - event: TokensBurned(indexed address,indexed address,indexed address,uint256,uint8,address,uint256)
 //   handler: handleTokensBurned
