@@ -241,7 +241,7 @@ interface TokenEvent {
   amount: BigInt!
 }
 
-type TokenMintedEvent @entity {
+type TokenMintedEvent implements TokenEvent @entity {
   id: ID!
 
   timestamp: BigInt!
@@ -257,7 +257,7 @@ type TokenMintedEvent @entity {
   amount: BigInt!
 }
 
-type TokenBurnedEvent @entity {
+type TokenBurnedEvent implements TokenEvent @entity {
   id: ID!
 
   timestamp: BigInt!
@@ -273,23 +273,7 @@ type TokenBurnedEvent @entity {
   amount: BigInt!
 }
 
-type TokenBalanceChangedEvent @entity {
-  id: ID!
-
-  timestamp: BigInt!
-
-  block: BigInt!
-
-  tx_hash: String!
-
-  token: String!
-
-  userTokenBalance: UserTokenBalance!
-
-  amount: BigInt!
-}
-
-type TokenTransferredEvent @entity {
+type TokenTransferredEvent implements TokenEvent @entity {
   id: ID!
 
   timestamp: BigInt!
@@ -304,17 +288,21 @@ type TokenTransferredEvent @entity {
 
   amount: BigInt!
 
-  relatedEvent: TokenTransferredEvent
+  "In any transfer there will be 2 entities generated since you will have a sender and receiver. The related event is the other event generated for this transfer"
+  relatedEvent: TokenTransferredEvent!
+
+  "Depicts whether the user for this event is the sender or receiver"
+  isSender: Boolean!
 }
 
 interface UserTokenBalance {
   id: ID!
 
   user: User!
-  
+
   balance: BigInt!
 
-  events: [TokenEvent!]!
+  events: [TokenEvent!]! @derivedFrom(field: "userTokenBalance")
 }
 
 type UserReputationTokenBalance implements UserTokenBalance @entity {

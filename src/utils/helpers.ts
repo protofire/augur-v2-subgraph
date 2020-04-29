@@ -11,8 +11,7 @@ import {
   UserReputationTokenBalance,
   TokenMintedEvent,
   TokenBurnedEvent,
-  TokenTransferredEvent,
-  TokenBalanceChangedEvent
+  TokenTransferredEvent
 } from "../../generated/schema";
 import {
   MarketCreated,
@@ -276,6 +275,7 @@ export function createAndSaveTokenTransferredEvents(
   eventFrom.userTokenBalance = ethereumEvent.params.from.toHexString();
   eventFrom.amount = ethereumEvent.params.value;
   eventFrom.relatedEvent = eventTo.id;
+  eventFrom.isSender = true;
 
   eventTo.timestamp = ethereumEvent.block.timestamp;
   eventTo.block = ethereumEvent.block.number;
@@ -284,25 +284,10 @@ export function createAndSaveTokenTransferredEvents(
   eventTo.userTokenBalance = ethereumEvent.params.to.toHexString();
   eventTo.amount = ethereumEvent.params.value;
   eventTo.relatedEvent = eventFrom.id;
+  eventTo.isSender = false;
 
   eventFrom.save();
   eventTo.save();
-}
-
-export function createAndSaveTokenBalanceChangedEvent(
-  ethereumEvent: TokenBalanceChanged
-): void {
-  let id = getEventId(ethereumEvent);
-  let event = new TokenBalanceChangedEvent(id);
-
-  event.timestamp = ethereumEvent.block.timestamp;
-  event.block = ethereumEvent.block.number;
-  event.tx_hash = ethereumEvent.transaction.hash.toHexString();
-  event.token = ethereumEvent.params.token.toHexString()
-  event.userTokenBalance = ethereumEvent.params.owner.toHexString();
-  event.amount = ethereumEvent.params.balance;
-
-  event.save();
 }
 
 export function getOrCreateUserReputationTokenBalance(
