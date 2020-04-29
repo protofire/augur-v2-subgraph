@@ -300,6 +300,8 @@ interface UserTokenBalance {
 
   user: User!
 
+  token: String!
+
   balance: BigInt!
 
   events: [TokenEvent!]! @derivedFrom(field: "userTokenBalance")
@@ -309,6 +311,36 @@ type UserReputationTokenBalance implements UserTokenBalance @entity {
   id: ID!
 
   user: User!
+
+  token: String!
+
+  balance: BigInt!
+
+  events: [TokenEvent!]! @derivedFrom(field: "userTokenBalance")
+}
+
+type UserDisputeTokenBalance implements UserTokenBalance @entity {
+  id: ID!
+
+  user: User!
+
+  market: Market!
+
+  outcome: BigInt!
+
+  token: String!
+
+  balance: BigInt!
+
+  events: [TokenEvent!]! @derivedFrom(field: "userTokenBalance")
+}
+
+type UserParticipationTokenBalance implements UserTokenBalance @entity {
+  id: ID!
+
+  user: User!
+
+  token: String!
 
   balance: BigInt!
 

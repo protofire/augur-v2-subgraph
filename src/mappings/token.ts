@@ -13,7 +13,9 @@ import {
   createAndSaveTokenBurnedEvent,
   createAndSaveTokenMintedEvent,
   createAndSaveTokenTransferredEvents,
-  getOrCreateUserReputationTokenBalance
+  getOrCreateUserReputationTokenBalance,
+  getOrCreateUserDisputeTokenBalance,
+  getOrCreateUserParticipationTokenBalance
 } from "../utils/helpers";
 import {
   ZERO_ADDRESS,
@@ -103,11 +105,33 @@ export function handleTokenBalanceChanged(event: TokenBalanceChanged): void {
   let targetUser = getOrCreateUser(event.params.owner.toHexString());
 
   if (tokenType == REPUTATION_TOKEN) {
-    let userTokenBalance = getOrCreateUserReputationTokenBalance(targetUser.id)
+    let userTokenBalance = getOrCreateUserReputationTokenBalance(targetUser.id);
+    userTokenBalance.token = event.params.token.toHexString();
     userTokenBalance.balance = event.params.balance;
     userTokenBalance.save();
   } else if (tokenType == DISPUTE_CROWDSOURCER) {
+    let id = targetUser.id
+      .concat("-")
+      .concat(event.params.market.toHexString())
+      .concat("-")
+      .concat(event.params.outcome.toString());
+    let userTokenBalance = getOrCreateUserDisputeTokenBalance(id);
+    userTokenBalance.token = event.params.token.toHexString();
+    userTokenBalance.market = event.params.market.toHexString();
+    userTokenBalance.user = targetUser.id;
+    userTokenBalance.outcome = event.params.outcome;
+    userTokenBalance.balance = event.params.balance;
+    userTokenBalance.save();
   } else if (tokenType == PARTICIPATION_TOKEN) {
+    let userTokenBalance = getOrCreateUserParticipationTokenBalance(
+      targetUser.id
+    );
+    userTokenBalance.token = event.params.token.toHexString();
+    userTokenBalance.balance = event.params.balance;
+    userTokenBalance.save();
+  } else {
+    log.error("Invalid token type, type: '{}'", [tokenType]);
+    return;
   }
 }
 
