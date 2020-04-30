@@ -15,7 +15,8 @@ import {
   createAndSaveTokenTransferredEvents,
   getOrCreateUserReputationTokenBalance,
   getOrCreateUserDisputeTokenBalance,
-  getOrCreateUserParticipationTokenBalance
+  getOrCreateUserParticipationTokenBalance,
+  getUserBalanceId
 } from "../utils/helpers";
 import {
   ZERO_ADDRESS,
@@ -104,18 +105,24 @@ export function handleTokenBalanceChanged(event: TokenBalanceChanged): void {
   let tokenType = getTokenTypeFromInt(event.params.tokenType);
   let targetUser = getOrCreateUser(event.params.owner.toHexString());
 
+  let userTokenBalanceId = getUserBalanceId(
+    event.params.owner.toHexString(),
+    event.params.token.toHexString(),
+    event.params.tokenType
+  );
+
   if (tokenType == REPUTATION_TOKEN) {
-    let userTokenBalance = getOrCreateUserReputationTokenBalance(targetUser.id);
+    let userTokenBalance = getOrCreateUserReputationTokenBalance(
+      userTokenBalanceId
+    );
+    userTokenBalance.user = targetUser.id;
     userTokenBalance.token = event.params.token.toHexString();
     userTokenBalance.balance = event.params.balance;
     userTokenBalance.save();
   } else if (tokenType == DISPUTE_CROWDSOURCER) {
-    let id = targetUser.id
-      .concat("-")
-      .concat(event.params.market.toHexString())
-      .concat("-")
-      .concat(event.params.outcome.toString());
-    let userTokenBalance = getOrCreateUserDisputeTokenBalance(id);
+    let userTokenBalance = getOrCreateUserDisputeTokenBalance(
+      userTokenBalanceId
+    );
     userTokenBalance.token = event.params.token.toHexString();
     userTokenBalance.market = event.params.market.toHexString();
     userTokenBalance.user = targetUser.id;
@@ -124,8 +131,9 @@ export function handleTokenBalanceChanged(event: TokenBalanceChanged): void {
     userTokenBalance.save();
   } else if (tokenType == PARTICIPATION_TOKEN) {
     let userTokenBalance = getOrCreateUserParticipationTokenBalance(
-      targetUser.id
+      userTokenBalanceId
     );
+    userTokenBalance.user = targetUser.id;
     userTokenBalance.token = event.params.token.toHexString();
     userTokenBalance.balance = event.params.balance;
     userTokenBalance.save();

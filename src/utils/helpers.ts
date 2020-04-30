@@ -239,14 +239,17 @@ export function createAndSaveTokenMintedEvent(
   let id = getEventId(ethereumEvent);
   let event = new TokenMintedEvent(id);
 
+  let userTokenBalanceId = getUserBalanceId(
+    ethereumEvent.params.target.toHexString(),
+    ethereumEvent.params.token.toHexString(),
+    ethereumEvent.params.tokenType
+  );
+
   event.timestamp = ethereumEvent.block.timestamp;
   event.block = ethereumEvent.block.number;
   event.tx_hash = ethereumEvent.transaction.hash.toHexString();
   event.token = ethereumEvent.params.token.toHexString();
-  event.userTokenBalance = getUserBalanceIdForTokenType(
-    ethereumEvent.params.target.toHexString(),
-    ethereumEvent.params.tokenType
-  );
+  event.userTokenBalance = userTokenBalanceId;
   event.amount = ethereumEvent.params.amount;
 
   event.save();
@@ -258,14 +261,17 @@ export function createAndSaveTokenBurnedEvent(
   let id = getEventId(ethereumEvent);
   let event = new TokenBurnedEvent(id);
 
+  let userTokenBalanceId = getUserBalanceId(
+    ethereumEvent.params.target.toHexString(),
+    ethereumEvent.params.token.toHexString(),
+    ethereumEvent.params.tokenType
+  );
+
   event.timestamp = ethereumEvent.block.timestamp;
   event.block = ethereumEvent.block.number;
   event.tx_hash = ethereumEvent.transaction.hash.toHexString();
   event.token = ethereumEvent.params.token.toHexString();
-  event.userTokenBalance = getUserBalanceIdForTokenType(
-    ethereumEvent.params.target.toHexString(),
-    ethereumEvent.params.tokenType
-  );
+  event.userTokenBalance = userTokenBalanceId;
   event.amount = ethereumEvent.params.amount;
 
   event.save();
@@ -279,14 +285,22 @@ export function createAndSaveTokenTransferredEvents(
   let eventFrom = new TokenTransferredEvent(idFrom);
   let eventTo = new TokenTransferredEvent(idTo);
 
+  let userTokenBalanceIdFrom = getUserBalanceId(
+    ethereumEvent.params.from.toHexString(),
+    ethereumEvent.params.token.toHexString(),
+    ethereumEvent.params.tokenType
+  );
+  let userTokenBalanceIdTo = getUserBalanceId(
+    ethereumEvent.params.to.toHexString(),
+    ethereumEvent.params.token.toHexString(),
+    ethereumEvent.params.tokenType
+  );
+
   eventFrom.timestamp = ethereumEvent.block.timestamp;
   eventFrom.block = ethereumEvent.block.number;
   eventFrom.tx_hash = ethereumEvent.transaction.hash.toHexString();
   eventFrom.token = ethereumEvent.params.token.toHexString();
-  eventFrom.userTokenBalance = getUserBalanceIdForTokenType(
-    ethereumEvent.params.from.toHexString(),
-    ethereumEvent.params.tokenType
-  );
+  eventFrom.userTokenBalance = userTokenBalanceIdFrom;
   eventFrom.amount = ethereumEvent.params.value;
   eventFrom.relatedEvent = eventTo.id;
   eventFrom.isSender = true;
@@ -295,10 +309,7 @@ export function createAndSaveTokenTransferredEvents(
   eventTo.block = ethereumEvent.block.number;
   eventTo.tx_hash = ethereumEvent.transaction.hash.toHexString();
   eventTo.token = ethereumEvent.params.token.toHexString();
-  eventTo.userTokenBalance = getUserBalanceIdForTokenType(
-    ethereumEvent.params.to.toHexString(),
-    ethereumEvent.params.tokenType
-  );
+  eventTo.userTokenBalance = userTokenBalanceIdTo;
   eventTo.amount = ethereumEvent.params.value;
   eventTo.relatedEvent = eventFrom.id;
   eventTo.isSender = false;
@@ -311,14 +322,12 @@ export function getOrCreateUserReputationTokenBalance(
   id: String,
   createIfNotFound: boolean = true
 ): UserReputationTokenBalance {
-  let normalizedId = REPUTATION_TOKEN.concat("-").concat(id);
-  let tokenBalance = UserReputationTokenBalance.load(normalizedId);
+  let tokenBalance = UserReputationTokenBalance.load(id);
 
   if (tokenBalance == null && createIfNotFound) {
-    tokenBalance = new UserReputationTokenBalance(normalizedId);
+    tokenBalance = new UserReputationTokenBalance(id);
 
     tokenBalance.balance = BIGINT_ZERO;
-    tokenBalance.user = id;
   }
 
   return tokenBalance as UserReputationTokenBalance;
@@ -328,11 +337,10 @@ export function getOrCreateUserDisputeTokenBalance(
   id: String,
   createIfNotFound: boolean = true
 ): UserDisputeTokenBalance {
-  let normalizedId = DISPUTE_CROWDSOURCER.concat("-").concat(id);
-  let tokenBalance = UserDisputeTokenBalance.load(normalizedId);
+  let tokenBalance = UserDisputeTokenBalance.load(id);
 
   if (tokenBalance == null && createIfNotFound) {
-    tokenBalance = new UserDisputeTokenBalance(normalizedId);
+    tokenBalance = new UserDisputeTokenBalance(id);
 
     tokenBalance.balance = BIGINT_ZERO;
   }
@@ -344,21 +352,25 @@ export function getOrCreateUserParticipationTokenBalance(
   id: String,
   createIfNotFound: boolean = true
 ): UserParticipationTokenBalance {
-  let normalizedId = PARTICIPATION_TOKEN.concat("-").concat(id);
-  let tokenBalance = UserParticipationTokenBalance.load(normalizedId);
+  let tokenBalance = UserParticipationTokenBalance.load(id);
 
   if (tokenBalance == null && createIfNotFound) {
-    tokenBalance = new UserParticipationTokenBalance(normalizedId);
+    tokenBalance = new UserParticipationTokenBalance(id);
 
     tokenBalance.balance = BIGINT_ZERO;
-    tokenBalance.user = id;
   }
 
   return tokenBalance as UserParticipationTokenBalance;
 }
 
-function getUserBalanceIdForTokenType(id: String, tokenType: i32): String {
+export function getUserBalanceId(
+  userId: String,
+  tokenId: String,
+  tokenType: i32
+): String {
   return getTokenTypeFromInt(tokenType)
     .concat("-")
-    .concat(id);
+    .concat(userId)
+    .concat("-")
+    .concat(tokenId);
 }
