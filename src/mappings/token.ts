@@ -16,7 +16,8 @@ import {
   getOrCreateUserReputationTokenBalance,
   getOrCreateUserDisputeTokenBalance,
   getOrCreateUserParticipationTokenBalance,
-  getUserBalanceId
+  getUserBalanceId,
+  getOrCreateToken
 } from "../utils/helpers";
 import {
   ZERO_ADDRESS,
@@ -35,17 +36,11 @@ import { toDecimal } from "../utils/decimals";
 // enum Augur.TokenType tokenType, address market, uint256 totalSupply)
 
 export function handleTokensMinted(event: TokensMinted): void {
-  // let tokenType = getTokenTypeFromInt(event.params.tokenType);
-  // let targetUser = getOrCreateUser(event.params.target.toHexString());
-  //
-  // if (tokenType == REPUTATION_TOKEN) {
-  //   let userTokenBalance = getOrCreateUserReputationTokenBalance(targetUser.id)
-  //   userTokenBalance.balance = userTokenBalance.balance + event.params.amount;
-  //   userTokenBalance.save();
-  // } else if (tokenType == DISPUTE_CROWDSOURCER) {
-  // } else if (tokenType == PARTICIPATION_TOKEN) {
-  // }
-
+  let token = getOrCreateToken(
+    event.params.token.toHexString(),
+    event.params.tokenType,
+    event.params.universe.toHexString()
+  );
   createAndSaveTokenMintedEvent(event);
 }
 
@@ -56,17 +51,11 @@ export function handleTokensMinted(event: TokensMinted): void {
 // enum Augur.TokenType tokenType, address market, uint256 totalSupply)
 
 export function handleTokensBurned(event: TokensBurned): void {
-  // let tokenType = getTokenTypeFromInt(event.params.tokenType);
-  // let targetUser = getOrCreateUser(event.params.target.toHexString());
-  //
-  // if (tokenType == REPUTATION_TOKEN) {
-  //   let userTokenBalance = getOrCreateUserReputationTokenBalance(targetUser.id)
-  //   userTokenBalance.balance = userTokenBalance.balance - event.params.amount;
-  //   userTokenBalance.save();
-  // } else if (tokenType == DISPUTE_CROWDSOURCER) {
-  // } else if (tokenType == PARTICIPATION_TOKEN) {
-  // }
-
+  let token = getOrCreateToken(
+    event.params.token.toHexString(),
+    event.params.tokenType,
+    event.params.universe.toHexString()
+  );
   createAndSaveTokenBurnedEvent(event);
 }
 
@@ -77,21 +66,11 @@ export function handleTokensBurned(event: TokensBurned): void {
 // uint256 value, enum Augur.TokenType tokenType, address market)
 
 export function handleTokensTransferred(event: TokensTransferred): void {
-  // let tokenType = getTokenTypeFromInt(event.params.tokenType);
-  // let fromUser = getOrCreateUser(event.params.from.toHexString());
-  // let toUser = getOrCreateUser(event.params.to.toHexString());
-  //
-  // if (tokenType == REPUTATION_TOKEN) {
-  //   let userTokenBalanceFrom = getOrCreateUserReputationTokenBalance(fromUser.id)
-  //   let userTokenBalanceTo = getOrCreateUserReputationTokenBalance(toUser.id)
-  //   userTokenBalanceFrom.balance = userTokenBalanceFrom.balance - event.params.value;
-  //   userTokenBalanceTo.balance = userTokenBalanceTo.balance + event.params.value;
-  //   userTokenBalanceFrom.save();
-  //   userTokenBalanceTo.save();
-  // } else if (tokenType == DISPUTE_CROWDSOURCER) {
-  // } else if (tokenType == PARTICIPATION_TOKEN) {
-  // }
-
+  let token = getOrCreateToken(
+    event.params.token.toHexString(),
+    event.params.tokenType,
+    event.params.universe.toHexString()
+  );
   createAndSaveTokenTransferredEvents(event);
 }
 
@@ -104,6 +83,11 @@ export function handleTokensTransferred(event: TokensTransferred): void {
 export function handleTokenBalanceChanged(event: TokenBalanceChanged): void {
   let tokenType = getTokenTypeFromInt(event.params.tokenType);
   let targetUser = getOrCreateUser(event.params.owner.toHexString());
+  let token = getOrCreateToken(
+    event.params.token.toHexString(),
+    event.params.tokenType,
+    event.params.universe.toHexString()
+  );
 
   let userTokenBalanceId = getUserBalanceId(
     event.params.owner.toHexString(),
@@ -116,6 +100,7 @@ export function handleTokenBalanceChanged(event: TokenBalanceChanged): void {
       userTokenBalanceId
     );
     userTokenBalance.user = targetUser.id;
+    userTokenBalance.universe = event.params.universe.toHexString();
     userTokenBalance.token = event.params.token.toHexString();
     userTokenBalance.balance = event.params.balance;
     userTokenBalance.save();
@@ -125,6 +110,7 @@ export function handleTokenBalanceChanged(event: TokenBalanceChanged): void {
     );
     userTokenBalance.token = event.params.token.toHexString();
     userTokenBalance.market = event.params.market.toHexString();
+    userTokenBalance.universe = event.params.universe.toHexString();
     userTokenBalance.user = targetUser.id;
     userTokenBalance.outcome = event.params.outcome;
     userTokenBalance.balance = event.params.balance;
@@ -135,6 +121,7 @@ export function handleTokenBalanceChanged(event: TokenBalanceChanged): void {
     );
     userTokenBalance.user = targetUser.id;
     userTokenBalance.token = event.params.token.toHexString();
+    userTokenBalance.universe = event.params.universe.toHexString();
     userTokenBalance.balance = event.params.balance;
     userTokenBalance.save();
   } else {

@@ -13,7 +13,8 @@ import {
   UserDisputeTokenBalance,
   TokenMintedEvent,
   TokenBurnedEvent,
-  TokenTransferredEvent
+  TokenTransferredEvent,
+  Token
 } from "../../generated/schema";
 import {
   MarketCreated,
@@ -250,6 +251,7 @@ export function createAndSaveTokenMintedEvent(
   event.tx_hash = ethereumEvent.transaction.hash.toHexString();
   event.token = ethereumEvent.params.token.toHexString();
   event.userTokenBalance = userTokenBalanceId;
+  event.universe = ethereumEvent.params.universe.toHexString();
   event.amount = ethereumEvent.params.amount;
 
   event.save();
@@ -272,6 +274,7 @@ export function createAndSaveTokenBurnedEvent(
   event.tx_hash = ethereumEvent.transaction.hash.toHexString();
   event.token = ethereumEvent.params.token.toHexString();
   event.userTokenBalance = userTokenBalanceId;
+  event.universe = ethereumEvent.params.universe.toHexString();
   event.amount = ethereumEvent.params.amount;
 
   event.save();
@@ -302,7 +305,10 @@ export function createAndSaveTokenTransferredEvents(
   eventFrom.token = ethereumEvent.params.token.toHexString();
   eventFrom.userTokenBalance = userTokenBalanceIdFrom;
   eventFrom.amount = ethereumEvent.params.value;
+  eventFrom.from = ethereumEvent.params.from.toHexString();
+  eventFrom.to = ethereumEvent.params.to.toHexString();
   eventFrom.relatedEvent = eventTo.id;
+  eventFrom.universe = ethereumEvent.params.universe.toHexString();
   eventFrom.isSender = true;
 
   eventTo.timestamp = ethereumEvent.block.timestamp;
@@ -311,7 +317,10 @@ export function createAndSaveTokenTransferredEvents(
   eventTo.token = ethereumEvent.params.token.toHexString();
   eventTo.userTokenBalance = userTokenBalanceIdTo;
   eventTo.amount = ethereumEvent.params.value;
+  eventTo.from = ethereumEvent.params.from.toHexString();
+  eventTo.to = ethereumEvent.params.to.toHexString();
   eventTo.relatedEvent = eventFrom.id;
+  eventTo.universe = ethereumEvent.params.universe.toHexString();
   eventTo.isSender = false;
 
   eventFrom.save();
@@ -373,4 +382,27 @@ export function getUserBalanceId(
     .concat(userId)
     .concat("-")
     .concat(tokenId);
+}
+
+export function getOrCreateToken(
+  id: String,
+  tokenType: i32,
+  universeId: String,
+  createIfNotFound: boolean = true,
+  save: boolean = true
+): Token {
+  let token = Token.load(id);
+
+  if (token == null && createIfNotFound) {
+    token = new Token(id);
+
+    token.tokenType = getTokenTypeFromInt(tokenType);
+    token.universe = universeId;
+
+    if (save) {
+      token.save();
+    }
+  }
+
+  return token as Token;
 }

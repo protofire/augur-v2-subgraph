@@ -7,9 +7,15 @@ enum MarketStatus {
 }
 
 enum MarketType {
-  YES_NO,
-  CATEGORICAL,
+  YES_NO
+  CATEGORICAL
   SCALAR
+}
+
+enum TokenType {
+  REPUTATION_TOKEN
+  DISPUTE_CROWDSOURCER
+  PARTICIPATION_TOKEN
 }
 
 type User @entity {
@@ -234,7 +240,9 @@ interface TokenEvent {
 
   tx_hash: String!
 
-  token: String!
+  universe: Universe!
+
+  token: Token!
 
   userTokenBalance: UserTokenBalance!
 
@@ -250,7 +258,9 @@ type TokenMintedEvent implements TokenEvent @entity {
 
   tx_hash: String!
 
-  token: String!
+  universe: Universe!
+
+  token: Token!
 
   userTokenBalance: UserTokenBalance!
 
@@ -266,7 +276,9 @@ type TokenBurnedEvent implements TokenEvent @entity {
 
   tx_hash: String!
 
-  token: String!
+  universe: Universe!
+
+  token: Token!
 
   userTokenBalance: UserTokenBalance!
 
@@ -282,11 +294,17 @@ type TokenTransferredEvent implements TokenEvent @entity {
 
   tx_hash: String!
 
-  token: String!
+  universe: Universe!
+
+  token: Token!
 
   userTokenBalance: UserTokenBalance!
 
   amount: BigInt!
+
+  from: User!
+
+  to: User!
 
   "In any transfer there will be 2 entities generated since you will have a sender and receiver. The related event is the other event generated for this transfer"
   relatedEvent: TokenTransferredEvent!
@@ -298,9 +316,11 @@ type TokenTransferredEvent implements TokenEvent @entity {
 interface UserTokenBalance {
   id: ID!
 
+  universe: Universe!
+
   user: User!
 
-  token: String!
+  token: Token!
 
   balance: BigInt!
 
@@ -310,9 +330,11 @@ interface UserTokenBalance {
 type UserReputationTokenBalance implements UserTokenBalance @entity {
   id: ID!
 
+  universe: Universe!
+
   user: User!
 
-  token: String!
+  token: Token!
 
   balance: BigInt!
 
@@ -322,13 +344,15 @@ type UserReputationTokenBalance implements UserTokenBalance @entity {
 type UserDisputeTokenBalance implements UserTokenBalance @entity {
   id: ID!
 
+  universe: Universe!
+
   user: User!
 
   market: Market!
 
   outcome: BigInt!
 
-  token: String!
+  token: Token!
 
   balance: BigInt!
 
@@ -338,11 +362,23 @@ type UserDisputeTokenBalance implements UserTokenBalance @entity {
 type UserParticipationTokenBalance implements UserTokenBalance @entity {
   id: ID!
 
+  universe: Universe!
+
   user: User!
 
-  token: String!
+  token: Token!
 
   balance: BigInt!
 
   events: [TokenEvent!]! @derivedFrom(field: "userTokenBalance")
+}
+
+type Token @entity {
+  id: ID!
+
+  universe: Universe!
+
+  tokenType: TokenType!
+
+  userBalances: [UserTokenBalance!]! @derivedFrom(field: "token")
 }
