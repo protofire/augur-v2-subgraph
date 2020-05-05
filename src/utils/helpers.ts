@@ -14,7 +14,12 @@ import {
   TokenMintedEvent,
   TokenBurnedEvent,
   TokenTransferredEvent,
-  Token
+  Token,
+  MarketReport,
+  Dispute,
+  DisputeWindow,
+  DisputeRound,
+  DisputeCrowdsourcer
 } from "../../generated/schema";
 import {
   MarketCreated,
@@ -405,4 +410,78 @@ export function getOrCreateToken(
   }
 
   return token as Token;
+}
+
+export function getOrCreateDispute(
+  id: String,
+  createIfNotFound: boolean = true
+): Dispute {
+  let dispute = Dispute.load(id);
+
+  if (dispute == null && createIfNotFound) {
+    dispute = new Dispute(id);
+
+    dispute.currentDisputeRound = 0;
+    dispute.isDone = false;
+  }
+
+  return dispute as Dispute;
+}
+
+export function getOrCreateDisputeWindow(
+  id: String,
+  createIfNotFound: boolean = true
+): DisputeWindow {
+  let disputeWindow = DisputeWindow.load(id);
+
+  if (disputeWindow == null && createIfNotFound) {
+    disputeWindow = new DisputeWindow(id);
+  }
+
+  return disputeWindow as DisputeWindow;
+}
+
+export function getOrCreateDisputeRound(
+  id: String,
+  createIfNotFound: boolean = true
+): DisputeRound {
+  let disputeWindow = DisputeRound.load(id);
+
+  if (disputeWindow == null && createIfNotFound) {
+    disputeWindow = new DisputeRound(id);
+
+    disputeWindow.isDone = false;
+  }
+
+  return disputeWindow as DisputeRound;
+}
+
+export function getOrCreateDisputeCrowdsourcer(
+  id: String,
+  createIfNotFound: boolean = true
+): DisputeCrowdsourcer {
+  let disputeCrowdsourcer = DisputeCrowdsourcer.load(id);
+
+  if (disputeCrowdsourcer == null && createIfNotFound) {
+    disputeCrowdsourcer = new DisputeCrowdsourcer(id);
+  }
+
+  return disputeCrowdsourcer as DisputeCrowdsourcer;
+}
+
+export function getOrCreateMarketReport(
+  id: String,
+  createIfNotFound: boolean = true
+): MarketReport {
+  let marketReport = MarketReport.load(id);
+
+  if (marketReport == null && createIfNotFound) {
+    marketReport = new MarketReport(id);
+
+    marketReport.market = id;
+    marketReport.isFinal = false;
+    marketReport.isInitialReport = true;
+  }
+
+  return marketReport as MarketReport;
 }

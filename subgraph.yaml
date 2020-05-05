@@ -56,6 +56,18 @@ dataSources:
           handler: handleTokenBalanceChanged
         - event: ShareTokenBalanceChanged(indexed address,indexed address,indexed address,uint256,uint256)
           handler: handleShareTokenBalanceChanged
+        - event: InitialReportSubmitted(indexed address,indexed address,indexed address,address,uint256,bool,uint256[],string,uint256,uint256,uint256)
+          handler: handleInitialReportSubmitted
+        - event: DisputeCrowdsourcerCompleted(indexed address,indexed address,address,uint256[],uint256,uint256,bool,uint256,uint256,uint256,uint256)
+          handler: handleDisputeCrowdsourcerCompleted
+        - event: DisputeCrowdsourcerContribution(indexed address,indexed address,indexed address,address,uint256,string,uint256[],uint256,uint256,uint256,uint256)
+          handler: handleDisputeCrowdsourcerContribution
+        - event: DisputeCrowdsourcerCreated(indexed address,indexed address,address,uint256[],uint256,uint256)
+          handler: handleDisputeCrowdsourcerCreated
+        - event: DisputeCrowdsourcerRedeemed(indexed address,indexed address,indexed address,address,uint256,uint256,uint256[],uint256)
+          handler: handleDisputeCrowdsourcerRedeemed
+        - event: DisputeWindowCreated(indexed address,address,uint256,uint256,uint256,bool)
+          handler: handleDisputeWindowCreated
 
 # Markets
   # DONE MarketCreated(indexed address,uint256,string,address,indexed address,address,uint256,int256[],uint8,uint256,bytes32[],uint256,uint256)
@@ -76,14 +88,14 @@ dataSources:
     # DONE TokensMinted(indexed address,indexed address,indexed address,uint256,uint8,address,uint256)
     # DONE TokensTransferred(indexed address,address,indexed address,indexed address,uint256,uint8,address)
   # Reporting
-    # - InitialReportSubmitted(indexed address,indexed address,indexed address,address,uint256,bool,uint256[],string,uint256,uint256,uint256)
+    # WORKING InitialReportSubmitted(indexed address,indexed address,indexed address,address,uint256,bool,uint256[],string,uint256,uint256,uint256)
     # - InitialReporterRedeemed(indexed address,indexed address,indexed address,address,uint256,uint256,uint256[],uint256)
     # - InitialReporterTransferred(indexed address,indexed address,address,address)
-    # - DisputeCrowdsourcerCompleted(indexed address,indexed address,address,uint256[],uint256,uint256,bool,uint256,uint256,uint256,uint256)
-    # - DisputeCrowdsourcerContribution(indexed address,indexed address,indexed address,address,uint256,string,uint256[],uint256,uint256,uint256,uint256)
-    # - DisputeCrowdsourcerCreated(indexed address,indexed address,address,uint256[],uint256,uint256)
-    # - DisputeCrowdsourcerRedeemed(indexed address,indexed address,indexed address,address,uint256,uint256,uint256[],uint256)
-    # - DisputeWindowCreated(indexed address,address,uint256,uint256,uint256,bool)
+    # WORKING DisputeCrowdsourcerCompleted(indexed address,indexed address,address,uint256[],uint256,uint256,bool,uint256,uint256,uint256,uint256)
+    # WORKING DisputeCrowdsourcerContribution(indexed address,indexed address,indexed address,address,uint256,string,uint256[],uint256,uint256,uint256,uint256)
+    # WORKING DisputeCrowdsourcerCreated(indexed address,indexed address,address,uint256[],uint256,uint256)
+    # WORKING DisputeCrowdsourcerRedeemed(indexed address,indexed address,indexed address,address,uint256,uint256,uint256[],uint256)
+    # WORKING DisputeWindowCreated(indexed address,address,uint256,uint256,uint256,bool)
     # - ReportingParticipantDisavowed(indexed address,indexed address,address)
     # - ParticipationTokensRedeemed(indexed address,indexed address,indexed address,uint256,uint256,uint256)
 # Universe

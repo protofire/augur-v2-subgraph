@@ -100,6 +100,8 @@ type Market @entity {
 
   openInterest: BigInt
 
+  report: MarketReport @derivedFrom(field: "market")
+
   events: [MarketEvent!]! @derivedFrom(field: "market")
 
   shareTokens: [ShareToken!]! @derivedFrom(field: "market")
@@ -382,3 +384,83 @@ type Token @entity {
 
   userBalances: [UserTokenBalance!]! @derivedFrom(field: "token")
 }
+
+type MarketReport @entity {
+  id: ID!
+
+  market: Market!
+
+  payoutNumerators: [BigInt!]!
+
+  reporter: User!
+
+  isDesignatedReporter: Boolean!
+
+  isInitialReport: Boolean!
+
+  isFinal: Boolean!
+
+  reportedAt: BigInt!
+}
+
+type Dispute @entity {
+  id: ID!
+
+  currentReport: MarketReport!
+
+  currentDisputeRound: Int!
+
+  market: Market!
+
+  universe: Universe!
+
+  isDone: Boolean!
+
+  rounds: [DisputeRound!]! @derivedFrom(field: "dispute")
+
+  creationTimestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+}
+
+type DisputeWindow @entity {
+  id: ID!
+
+  universe: Universe!
+
+  startTime: BigInt!
+
+  endTime: BigInt!
+}
+
+type DisputeRound @entity {
+  id: ID!
+
+  dispute: Dispute!
+
+  market: Market!
+
+  universe: Universe!
+
+  isDone: Boolean!
+
+  crowdsourcers: [DisputeCrowdsourcer!]! @derivedFrom(field: "disputeRound")
+}
+
+type DisputeCrowdsourcer @entity {
+  id: ID!
+
+  market: Market!
+
+  universe: Universe!
+
+  outcome: BigInt!
+
+  staked: BigInt!
+
+  disputeRound: DisputeRound!
+}
+
+# it would be good to create entities out of outcomes...

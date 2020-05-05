@@ -24,3 +24,12 @@ export {
   handleTokenBalanceChanged,
   handleShareTokenBalanceChanged
 } from "./mappings/token";
+
+export {
+  handleDisputeWindowCreated,
+  handleDisputeCrowdsourcerCreated,
+  handleDisputeCrowdsourcerRedeemed,
+  handleDisputeCrowdsourcerCompleted,
+  handleDisputeCrowdsourcerContribution,
+  handleInitialReportSubmitted
+} from "./mappings/dispute";
