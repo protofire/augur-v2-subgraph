@@ -10,6 +10,8 @@ import {
   getOrCreateUniverse,
   getOrCreateUser,
   getOrCreateMarket,
+  getOrCreateMarketReport,
+  getOrCreateDispute,
   createAndSaveCreateMarketEvent,
   createAndSaveMigrateMarketEvent,
   createAndSaveTransferMarketEvent,
@@ -56,6 +58,7 @@ export function handleMarketCreated(event: MarketCreated): void {
   market.marketTypeRaw = event.params.marketType;
   market.marketType = getMarketTypeFromInt(event.params.marketType);
   market.outcomes = event.params.outcomes;
+  market.numOutcomes = event.params.outcomes.length;
   market.timestamp = event.params.timestamp;
   market.noShowBond = event.params.noShowBond;
   market.status = STATUS_TRADING;
@@ -75,9 +78,18 @@ export function handleMarketCreated(event: MarketCreated): void {
 
 export function handleMarketFinalized(event: MarketFinalized): void {
   let market = getOrCreateMarket(event.params.market.toHexString());
+  let dispute = getOrCreateDispute(event.params.market.toHexString())
+  let marketReport = getOrCreateMarketReport(event.params.market.toHexString())
+
+  dispute.isDone = true;
 
   market.status = STATUS_FINALIZED;
+
+  marketReport.isFinal = true;
+
+  marketReport.save();
   market.save();
+  dispute.save();
 
   createAndSaveFinalizeMarketEvent(event);
 }

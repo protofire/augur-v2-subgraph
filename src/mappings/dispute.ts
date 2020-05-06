@@ -40,23 +40,34 @@ export function handleInitialReportSubmitted(
   let reporter = getOrCreateUser(event.params.reporter.toHexString());
   let marketReport = getOrCreateMarketReport(event.params.market.toHexString());
   let dispute = getOrCreateDispute(event.params.market.toHexString());
+  let disputeRound = getOrCreateDisputeRound(
+    event.params.market.toHexString().concat("-0")
+  );
 
   market.status = STATUS_REPORTING;
+  market.dispute = dispute.id;
+  market.report = marketReport.id;
 
   marketReport.payoutNumerators = event.params.payoutNumerators;
-  marketReport.reportedAt = event.block.timestamp;
-  marketReport.reporter = reporter.id;
+  marketReport.firstReportedAt = event.block.timestamp;
+  marketReport.lastReportedAt = event.block.timestamp;
+  marketReport.initialReporter = reporter.id;
   marketReport.isDesignatedReporter = event.params.isDesignatedReporter;
 
   dispute.market = market.id;
   dispute.currentReport = marketReport.id;
   dispute.universe = event.params.universe.toHexString();
-  dispute.currentDisputeRound = 0;
+  dispute.currentDisputeRound = disputeRound.id;
   dispute.creationTimestamp = event.block.timestamp;
   dispute.block = event.block.number;
   dispute.tx_hash = event.transaction.hash.toHexString();
 
+  disputeRound.dispute = dispute.id;
+  disputeRound.market = market.id;
+  disputeRound.universe = event.params.universe.toHexString();
+
   dispute.save();
+  disputeRound.save();
   market.save();
   marketReport.save();
 }
@@ -68,7 +79,25 @@ export function handleInitialReportSubmitted(
 
 export function handleDisputeCrowdsourcerCompleted(
   event: DisputeCrowdsourcerCompleted
-): void {}
+): void {
+  let market = getOrCreateMarket(event.params.market.toHexString());
+  let marketReport = getOrCreateMarketReport(event.params.market.toHexString());
+  let disputeCrowdsourcer = getOrCreateDisputeCrowdsourcer(
+    event.params.disputeCrowdsourcer.toHexString()
+  );
+
+  disputeCrowdsourcer.bondFilled = true;
+
+  market.status = STATUS_DISPUTING;
+
+  marketReport.payoutNumerators = event.params.payoutNumerators;
+  marketReport.isInitialReport = false;
+  marketReport.lastReportedAt = event.block.timestamp;
+
+  market.save();
+  marketReport.save();
+  disputeCrowdsourcer.save();
+}
 
 // - event: DisputeCrowdsourcerContribution(indexed address,indexed address,indexed address,address,uint256,string,uint256[],uint256,uint256,uint256,uint256)
 //   handler: handleDisputeCrowdsourcerContribution
@@ -77,7 +106,15 @@ export function handleDisputeCrowdsourcerCompleted(
 
 export function handleDisputeCrowdsourcerContribution(
   event: DisputeCrowdsourcerContribution
-): void {}
+): void {
+  let disputeCrowdsourcer = getOrCreateDisputeCrowdsourcer(
+    event.params.disputeCrowdsourcer.toHexString()
+  );
+  disputeCrowdsourcer.staked =
+    disputeCrowdsourcer.staked + event.params.amountStaked;
+
+  disputeCrowdsourcer.save();
+}
 
 // - event: DisputeCrowdsourcerCreated(indexed address,indexed address,address,uint256[],uint256,uint256)
 //   handler: handleDisputeCrowdsourcerCreated
@@ -86,7 +123,38 @@ export function handleDisputeCrowdsourcerContribution(
 
 export function handleDisputeCrowdsourcerCreated(
   event: DisputeCrowdsourcerCreated
-): void {}
+): void {
+  let disputeRoundId = event.params.market
+    .toHexString()
+    .concat("-")
+    .concat(event.params.disputeRound.toString());
+  let dispute = getOrCreateDispute(event.params.market.toHexString());
+  let disputeRound = getOrCreateDisputeRound(dispute.currentDisputeRound);
+  if (disputeRound.id != disputeRoundId) {
+    disputeRound = getOrCreateDisputeRound(disputeRoundId);
+
+    dispute.currentDisputeRound = disputeRound.id;
+
+    disputeRound.dispute = dispute.id;
+    disputeRound.market = event.params.market.toHexString();
+    disputeRound.universe = event.params.universe.toHexString();
+
+    disputeRound.save();
+    dispute.save();
+  }
+
+  let disputeCrowdsourcer = getOrCreateDisputeCrowdsourcer(
+    event.params.disputeCrowdsourcer.toHexString()
+  );
+
+  disputeCrowdsourcer.disputeRound = disputeRound.id;
+  disputeCrowdsourcer.payoutNumerators = event.params.payoutNumerators;
+  disputeCrowdsourcer.disputeBondSize = event.params.size;
+  disputeCrowdsourcer.market = event.params.market.toHexString();
+  disputeCrowdsourcer.universe = event.params.universe.toHexString();
+
+  disputeCrowdsourcer.save();
+}
 
 // - event: DisputeCrowdsourcerRedeemed(indexed address,indexed address,indexed address,address,uint256,uint256,uint256[],uint256)
 //   handler: handleDisputeCrowdsourcerRedeemed

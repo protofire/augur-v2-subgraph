@@ -421,7 +421,6 @@ export function getOrCreateDispute(
   if (dispute == null && createIfNotFound) {
     dispute = new Dispute(id);
 
-    dispute.currentDisputeRound = 0;
     dispute.isDone = false;
   }
 
@@ -445,15 +444,13 @@ export function getOrCreateDisputeRound(
   id: String,
   createIfNotFound: boolean = true
 ): DisputeRound {
-  let disputeWindow = DisputeRound.load(id);
+  let disputeRound = DisputeRound.load(id);
 
-  if (disputeWindow == null && createIfNotFound) {
-    disputeWindow = new DisputeRound(id);
-
-    disputeWindow.isDone = false;
+  if (disputeRound == null && createIfNotFound) {
+    disputeRound = new DisputeRound(id);
   }
 
-  return disputeWindow as DisputeRound;
+  return disputeRound as DisputeRound;
 }
 
 export function getOrCreateDisputeCrowdsourcer(
@@ -464,6 +461,9 @@ export function getOrCreateDisputeCrowdsourcer(
 
   if (disputeCrowdsourcer == null && createIfNotFound) {
     disputeCrowdsourcer = new DisputeCrowdsourcer(id);
+
+    disputeCrowdsourcer.bondFilled = false;
+    disputeCrowdsourcer.staked = BIGINT_ZERO;
   }
 
   return disputeCrowdsourcer as DisputeCrowdsourcer;

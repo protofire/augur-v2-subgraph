@@ -89,6 +89,8 @@ type Market @entity {
 
   outcomes: [Bytes!]!
 
+  numOutcomes: Int!
+
   "Creation timestamp"
   timestamp: BigInt!
 
@@ -100,11 +102,13 @@ type Market @entity {
 
   openInterest: BigInt
 
-  report: MarketReport @derivedFrom(field: "market")
+  report: MarketReport
 
   events: [MarketEvent!]! @derivedFrom(field: "market")
 
   shareTokens: [ShareToken!]! @derivedFrom(field: "market")
+
+  dispute: Dispute
 }
 
 interface MarketEvent {
@@ -390,30 +394,39 @@ type MarketReport @entity {
 
   market: Market!
 
+  "Current payout numerators reported. This essentially represents the current tentative outcome but expressed as a payout set"
   payoutNumerators: [BigInt!]!
 
-  reporter: User!
+  "User that first reported the market result"
+  initialReporter: User!
 
+  "Whether the first reporter was the designated reporter or not"
   isDesignatedReporter: Boolean!
 
+  "Whether the current report state is the initial report."
   isInitialReport: Boolean!
 
+  "Whether the current report is final and won't be subject to change because of challenges"
   isFinal: Boolean!
 
-  reportedAt: BigInt!
+  lastReportedAt: BigInt!
+
+  firstReportedAt: BigInt!
 }
 
 type Dispute @entity {
   id: ID!
 
+  "Updated report for the market"
   currentReport: MarketReport!
 
-  currentDisputeRound: Int!
+  currentDisputeRound: DisputeRound!
 
   market: Market!
 
   universe: Universe!
 
+  "Depicts whether the dispute is completed or not. It will be done once the market has finalized because the tentative outcome hasn't been challenged in a whole dispute window"
   isDone: Boolean!
 
   rounds: [DisputeRound!]! @derivedFrom(field: "dispute")
@@ -444,8 +457,6 @@ type DisputeRound @entity {
 
   universe: Universe!
 
-  isDone: Boolean!
-
   crowdsourcers: [DisputeCrowdsourcer!]! @derivedFrom(field: "disputeRound")
 }
 
@@ -456,9 +467,17 @@ type DisputeCrowdsourcer @entity {
 
   universe: Universe!
 
-  outcome: BigInt!
+  "Payout numerators depict all the outcomes and their respective 'share' of the winnings based on the numTick of the market"
+  payoutNumerators: [BigInt!]!
 
+  "Amount of attoREP staked"
   staked: BigInt!
+
+  "Amount of attoREP needed for the dispute bond to be filled and challenge/dispute the current tentative report"
+  disputeBondSize: BigInt!
+
+  "Whether the bond has been filled or not"
+  bondFilled: Boolean!
 
   disputeRound: DisputeRound!
 }
