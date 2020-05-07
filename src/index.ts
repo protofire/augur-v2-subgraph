@@ -28,7 +28,6 @@ export {
 export {
   handleDisputeWindowCreated,
   handleDisputeCrowdsourcerCreated,
-  handleDisputeCrowdsourcerRedeemed,
   handleDisputeCrowdsourcerCompleted,
   handleDisputeCrowdsourcerContribution,
   handleInitialReportSubmitted

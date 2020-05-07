@@ -330,6 +330,8 @@ interface UserTokenBalance {
 
   balance: BigInt!
 
+  attoBalance: BigDecimal!
+
   events: [TokenEvent!]! @derivedFrom(field: "userTokenBalance")
 }
 
@@ -343,6 +345,8 @@ type UserReputationTokenBalance implements UserTokenBalance @entity {
   token: Token!
 
   balance: BigInt!
+
+  attoBalance: BigDecimal!
 
   events: [TokenEvent!]! @derivedFrom(field: "userTokenBalance")
 }
@@ -362,6 +366,8 @@ type UserDisputeTokenBalance implements UserTokenBalance @entity {
 
   balance: BigInt!
 
+  attoBalance: BigDecimal!
+
   events: [TokenEvent!]! @derivedFrom(field: "userTokenBalance")
 }
 
@@ -375,6 +381,8 @@ type UserParticipationTokenBalance implements UserTokenBalance @entity {
   token: Token!
 
   balance: BigInt!
+
+  attoBalance: BigDecimal!
 
   events: [TokenEvent!]! @derivedFrom(field: "userTokenBalance")
 }

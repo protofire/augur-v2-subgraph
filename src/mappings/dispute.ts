@@ -156,15 +156,6 @@ export function handleDisputeCrowdsourcerCreated(
   disputeCrowdsourcer.save();
 }
 
-// - event: DisputeCrowdsourcerRedeemed(indexed address,indexed address,indexed address,address,uint256,uint256,uint256[],uint256)
-//   handler: handleDisputeCrowdsourcerRedeemed
-
-// event DisputeCrowdsourcerRedeemed(address indexed universe, address indexed reporter, address indexed market, address disputeCrowdsourcer, uint256 amountRedeemed, uint256 repReceived, uint256[] payoutNumerators, uint256 timestamp);
-
-export function handleDisputeCrowdsourcerRedeemed(
-  event: DisputeCrowdsourcerRedeemed
-): void {}
-
 // - event: DisputeWindowCreated(indexed address,address,uint256,uint256,uint256,bool)
 //   handler: handleDisputeWindowCreated
 
