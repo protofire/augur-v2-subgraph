@@ -35,3 +35,5 @@ export {
 export { getOrCreateUniverse } from "./universe";
 
 export { getOrCreateUser } from "./user";
+
+export { getOrCreateAugur, getOrCreateContract } from "./augur";

@@ -17,7 +17,33 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/index.ts
       entities:
-        - Delegate
+        - Augur
+        - Contract
+        - User
+        - Universe
+        - Market
+        - Outcome
+        - MarketEvent
+        - TransferMarketEvent
+        - MigrateMarketEvent
+        - CreateMarketEvent
+        - FinalizeMarketEvent
+        - OIChangeMarketEvent
+        - ShareToken
+        - TokenEvent
+        - TokenMintedEvent
+        - TokenBurnedEvent
+        - TokenTransferredEvent
+        - UserTokenBalance
+        - UserReputationTokenBalance
+        - UserDisputeTokenBalance
+        - UserParticipationTokenBalance
+        - Token
+        - MarketReport
+        - Dispute
+        - DisputeWindow
+        - DisputeRound
+        - DisputeCrowdsourcer
       abis:
         - name: Augur
           file: ./abis/Augur.json
@@ -66,6 +92,12 @@ dataSources:
           handler: handleDisputeCrowdsourcerCreated
         - event: DisputeWindowCreated(indexed address,address,uint256,uint256,uint256,bool)
           handler: handleDisputeWindowCreated
+        - event: FinishDeployment()
+          handler: handleFinishDeployment
+        - event: RegisterContract(address,bytes32)
+          handler: handleRegisterContract
+        - event: TimestampSet(uint256)
+          handler: handleTimestampSet
 
 # Markets
   # DONE MarketCreated(indexed address,uint256,string,address,indexed address,address,uint256,int256[],uint8,uint256,bytes32[],uint256,uint256)
@@ -105,6 +137,6 @@ dataSources:
   # DONE ValidityBondChanged(indexed address,uint256)
   # DONE WarpSyncDataUpdated(indexed address,uint256,uint256)
 # General
-  # - FinishDeployment()
-  # - RegisterContract(address,bytes32)
-  # - TimestampSet(uint256)
+  # DONE FinishDeployment()
+  # DONE RegisterContract(address,bytes32)
+  # DONE TimestampSet(uint256)

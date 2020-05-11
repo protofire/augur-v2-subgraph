@@ -32,3 +32,9 @@ export {
   handleDisputeCrowdsourcerContribution,
   handleInitialReportSubmitted
 } from "./mappings/dispute";
+
+export {
+  handleFinishDeployment,
+  handleTimestampSet,
+  handleRegisterContract
+} from "./mappings/augur";
