@@ -5,7 +5,8 @@ import {
   CreateMarketEvent,
   TransferMarketEvent,
   OIChangeMarketEvent,
-  MarketReport
+  MarketReport,
+  Outcome
 } from "../../../generated/schema";
 import {
   MarketCreated,
@@ -14,8 +15,8 @@ import {
   MarketFinalized,
   MarketOIChanged
 } from "../../../generated/Augur/Augur";
-import { EthereumEvent, log } from "@graphprotocol/graph-ts";
-import { marketTypes } from "../constants";
+import { EthereumEvent, Bytes, log } from "@graphprotocol/graph-ts";
+import { marketTypes, YES_NO, SCALAR, CATEGORICAL } from "../constants";
 
 export function getOrCreateMarket(
   id: String,
@@ -150,4 +151,98 @@ export function getOrCreateMarketReport(
   }
 
   return marketReport as MarketReport;
+}
+
+function getOutcomesAmountForMarketType(
+  outcomes: Bytes[],
+  marketType: String
+): i32 {
+  if (marketType == SCALAR || marketType == YES_NO) {
+    return 3;
+  } else {
+    return outcomes.length;
+  }
+}
+
+function createInvalidOutcome(marketId: String): String {
+  let outcome = getOrCreateOutcome(marketId.concat("-0"));
+  outcome.market = marketId;
+  outcome.value = "INVALID";
+
+  outcome.save();
+  return outcome.id;
+}
+
+export function getOrCreateOutcome(
+  id: String,
+  createIfNotFound: boolean = true
+): Outcome {
+  let outcome = Outcome.load(id);
+
+  if (outcome == null && createIfNotFound) {
+    outcome = new Outcome(id);
+  }
+
+  return outcome as Outcome;
+}
+
+export function getOutcomesForMarket(
+  outcomes: Bytes[],
+  marketType: String,
+  marketId: String
+): String[] {
+  let outcomeAmount = getOutcomesAmountForMarketType(outcomes, marketType);
+  let parsedOutcomes = new Array<String>(outcomeAmount);
+  let invalidOutcome = createInvalidOutcome(marketId);
+  parsedOutcomes.push(invalidOutcome);
+
+  if (marketType == SCALAR) {
+    let shortOutcome = getOrCreateOutcome(marketId.concat("-1"));
+    let longOutcome = getOrCreateOutcome(marketId.concat("-2"));
+
+    shortOutcome.market = marketId;
+    shortOutcome.value = "SHORT";
+
+    longOutcome.market = marketId;
+    longOutcome.value = "LONG";
+
+    shortOutcome.save();
+    longOutcome.save();
+
+    parsedOutcomes.push(shortOutcome.id);
+    parsedOutcomes.push(longOutcome.id);
+  } else if (marketType == YES_NO) {
+    let noOutcome = getOrCreateOutcome(marketId.concat("-1"));
+    let yesOutcome = getOrCreateOutcome(marketId.concat("-2"));
+
+    noOutcome.market = marketId;
+    noOutcome.value = "NO";
+
+    yesOutcome.market = marketId;
+    yesOutcome.value = "YES";
+
+    noOutcome.save();
+    yesOutcome.save();
+
+    parsedOutcomes.push(noOutcome.id);
+    parsedOutcomes.push(yesOutcome.id);
+  } else if (marketType == CATEGORICAL) {
+    let outcomeId = "";
+    for (let i = 0; i < outcomeAmount; i++) {
+      let id = i + 1
+      outcomeId = marketId.concat("-").concat(id.toString()); // because invalid is not present in the outcome list for categoricals
+
+      let outcome = getOrCreateOutcome(outcomeId);
+      outcome.value = outcomes[i].toString();
+      outcome.valueRaw = outcomes[i];
+      outcome.market = marketId;
+      outcome.save();
+
+      parsedOutcomes.push(outcomeId);
+    }
+  } else {
+    log.error("Market type invalid: {}. Market ID: {}", [marketType, marketId]);
+    return [];
+  }
+  return parsedOutcomes;
 }

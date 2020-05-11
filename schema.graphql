@@ -87,7 +87,7 @@ type Market @entity {
 
   marketType: MarketType!
 
-  outcomes: [Bytes!]!
+  outcomes: [Outcome!]!
 
   numOutcomes: Int!
 
@@ -490,4 +490,14 @@ type DisputeCrowdsourcer @entity {
   disputeRound: DisputeRound!
 }
 
-# it would be good to create entities out of outcomes...
+type Outcome @entity {
+  id: ID!
+
+  market: Market!
+
+  value: String!
+
+  valueRaw: Bytes
+
+  payoutValue: BigInt
+}

@@ -17,7 +17,8 @@ import {
   createAndSaveTransferMarketEvent,
   createAndSaveFinalizeMarketEvent,
   createAndSaveOIChangeMarketEvent,
-  getMarketTypeFromInt
+  getMarketTypeFromInt,
+  getOutcomesForMarket
 } from "../utils/helpers";
 import {
   ZERO_ADDRESS,
@@ -57,7 +58,7 @@ export function handleMarketCreated(event: MarketCreated): void {
   market.prices = event.params.prices;
   market.marketTypeRaw = event.params.marketType;
   market.marketType = getMarketTypeFromInt(event.params.marketType);
-  market.outcomes = event.params.outcomes;
+  market.outcomes = getOutcomesForMarket(event.params.outcomes, market.marketType, market.id);
   market.numOutcomes = event.params.outcomes.length;
   market.timestamp = event.params.timestamp;
   market.noShowBond = event.params.noShowBond;

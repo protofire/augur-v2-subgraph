@@ -7,7 +7,9 @@ export {
   createAndSaveOIChangeMarketEvent,
   createAndSaveTransferMarketEvent,
   getEventId,
-  getMarketTypeFromInt
+  getMarketTypeFromInt,
+  getOrCreateOutcome,
+  getOutcomesForMarket
 } from "./market";
 
 export {
