@@ -92,6 +92,7 @@ export function handleMarketFinalized(event: MarketFinalized): void {
   market.status = STATUS_FINALIZED;
 
   marketReport.isFinal = true;
+  marketReport.payoutNumerators = event.params.winningPayoutNumerators
 
   marketReport.save();
   market.save();

@@ -21,12 +21,16 @@ enum TokenType {
 type User @entity {
   id: ID!
 
+  "Balance entities for tokens such as Reputation and Participation tokens"
   userTokenBalances: [UserTokenBalance!]! @derivedFrom(field: "user")
 
+  "Markets created by this user"
   marketsCreated: [Market!]! @derivedFrom(field: "creator")
 
+  "Markets where this user is the designated reporter"
   marketsAsReporter: [Market!]! @derivedFrom(field: "designatedReporter")
 
+  "Share tokens that this user has"
   shareTokens: [ShareToken!]! @derivedFrom(field: "owner")
 }
 
@@ -55,21 +59,26 @@ type Universe @entity {
   "Latest warpSync file hash"
   warpSyncHash: BigInt
 
+  ""
   markets: [Market!]! @derivedFrom(field: "universe")
 
-  children: [Universe!]! @derivedFrom(field: "parentUniverse")
+  "Children universe that this universe created when it forked. It can be null if the universe hasn't forked"
+  children: [Universe!] @derivedFrom(field: "parentUniverse")
 }
 
 type Market @entity {
   id: ID!
 
+  "Universe that this market belongs to"
   universe: Universe!
 
+  "User that created the market"
   creator: User!
 
+  "Current owner of the market"
   owner: User!
 
-  "Extra information in JSON format"
+  "Extra information in JSON format. Includes market description and possibly other information"
   extraInfo: String!
 
   "Number of Ticks in a complete set"
@@ -81,14 +90,19 @@ type Market @entity {
   "Timestamp depicting the end of the real world event for that market"
   endTimestamp: BigInt!
 
+  "Minimum and maximum price for yes/no and categorical markets. For scalar markets it depicts the min and max values of the scalar."
   prices: [BigInt!]!
 
+  "Internal enum id of the market type"
   marketTypeRaw: Int!
 
+  "Market type as a string enum"
   marketType: MarketType!
 
+  "Possible outcomes of the market"
   outcomes: [Outcome!]! @derivedFrom(field:"market")
 
+  "Amount of different outcomes for the market."
   numOutcomes: Int!
 
   "Creation timestamp"
@@ -102,24 +116,32 @@ type Market @entity {
 
   openInterest: BigInt
 
+  "Entity depicting the current tentative or final result of the market"
   report: MarketReport
 
+  "List of all the market events triggered"
   events: [MarketEvent!]! @derivedFrom(field: "market")
 
+  "Share tokens traded on this market"
   shareTokens: [ShareToken!]! @derivedFrom(field: "market")
 
+  "Entity depicting the disputing process"
   dispute: Dispute
 }
 
 interface MarketEvent {
   id: ID!
 
+  "Market on which this event has been triggered"
   market: Market!
 
+  "Timestamp of the event"
   timestamp: BigInt!
 
+  "Block on which the event was triggered"
   block: BigInt!
 
+  "Transaction hash on which the event triggered"
   tx_hash: String!
 }
 
@@ -136,8 +158,10 @@ type TransferMarketEvent implements MarketEvent @entity {
 
   universe: Universe!
 
+  "Previous owner of the market"
   from: User!
 
+  "New owner of the market"
   to: User!
 }
 
@@ -152,8 +176,10 @@ type MigrateMarketEvent implements MarketEvent @entity {
 
   tx_hash: String!
 
+  "Previous universe on which the market existed"
   originalUniverse: Universe!
 
+  "New universe on which the market now exists"
   newUniverse: Universe!
 }
 
@@ -168,30 +194,42 @@ type CreateMarketEvent implements MarketEvent @entity {
 
   tx_hash: String!
 
+  "Universe on which the market exists"
   universe: Universe!
 
+  "Timestamp depicting the end of the trading phase for the market"
   endTime: BigInt!
 
+  "Extra info in JSON format. Can include description and other data"
   extraInfo: String!
 
+  "User that created the market"
   marketCreator: User!
 
+  "Original designated reported for the market"
   designatedReporter: User!
 
   feePerCashInAttoCash: BigInt!
 
+  "Minimum and maximum price for yes/no and categorical markets. For scalar markets it depicts the min and max values of the scalar."
   prices: [BigInt!]!
 
+  "Internal enum id of the market type"
   marketTypeRaw: Int!
 
+  "Market type as a string enum"
   marketType: MarketType!
 
+  "Number of ticks setted on the market"
   numTicks: BigInt!
 
+  "Different outcomes possible for categorical markets"
   outcomes: [Bytes!]!
 
+  "noShowBond payed for market creation"
   noShowBond: BigInt!
 
+  "Timestamp of the creation of the market"
   creationTimestamp: BigInt!
 }
 
@@ -206,8 +244,10 @@ type FinalizeMarketEvent implements MarketEvent @entity {
 
   tx_hash: String!
 
+  "Timestamp of the market finalization"
   finalizeTimestamp: BigInt!
 
+  "Payout distribution set that won the reporting/dispute process"
   winningPayoutNumerators: [BigInt!]!
 }
 
@@ -222,38 +262,51 @@ type OIChangeMarketEvent implements MarketEvent @entity {
 
   tx_hash: String!
 
+  "New open interest for the market"
   openInterest: BigInt!
 }
 
 type ShareToken @entity {
   id: ID!
 
+  "Owner of the ShareToken"
   owner: User!
 
+  "Current balance of the ShareToken"
   balance: BigInt!
 
+  "Outcome entity that this share represents"
   outcome: Outcome!
 
+  "Outcome internal ID"
   outcomeRaw: BigInt!
 
+  "Market that this share is being traded on."
   market: Market!
 }
 
 interface TokenEvent {
   id: ID!
 
+  "Timestamp when the event was triggered"
   timestamp: BigInt!
 
+  "Block where the event was triggered"
   block: BigInt!
 
+  "Transaction hash where the event triggered"
   tx_hash: String!
 
+  "Universe where the token exists"
   universe: Universe!
 
+  "Token which triggered the event"
   token: Token!
 
+  "Balance that was modified by this event"
   userTokenBalance: UserTokenBalance!
 
+  "Amount of balance modified with this event"
   amount: BigInt!
 }
 
@@ -310,30 +363,38 @@ type TokenTransferredEvent implements TokenEvent @entity {
 
   amount: BigInt!
 
+  "User that sent the amount of tokens specified"
   from: User!
 
+  "User that received the amount of tokens specified"
   to: User!
 
   "In any transfer there will be 2 entities generated since you will have a sender and receiver. The related event is the other event generated for this transfer"
   relatedEvent: TokenTransferredEvent!
 
-  "Depicts whether the user for this event is the sender or receiver"
+  "Depicts whether the userTokenBalance for this event is the senders' or receivers'"
   isSender: Boolean!
 }
 
 interface UserTokenBalance {
   id: ID!
 
+  "Universe in which this balance exists"
   universe: Universe!
 
+  "User that owns this balance"
   user: User!
 
+  "Token entity"
   token: Token!
 
+  "Balance in smallest unit for the token"
   balance: BigInt!
 
+  "Balance in atto units"
   attoBalance: BigDecimal!
 
+  "Token events for the balance"
   events: [TokenEvent!]! @derivedFrom(field: "userTokenBalance")
 }
 
@@ -360,8 +421,10 @@ type UserDisputeTokenBalance implements UserTokenBalance @entity {
 
   user: User!
 
+  "Market in which the staking takes place"
   market: Market!
 
+  "Outcome selected for the staking"
   outcome: BigInt!
 
   token: Token!
@@ -392,10 +455,13 @@ type UserParticipationTokenBalance implements UserTokenBalance @entity {
 type Token @entity {
   id: ID!
 
+  "Universe in which the token exists"
   universe: Universe!
 
+  "Type of token"
   tokenType: TokenType!
 
+  "All balance entities that use this token"
   userBalances: [UserTokenBalance!]! @derivedFrom(field: "token")
 }
 
@@ -497,8 +563,10 @@ type Outcome @entity {
 
   market: Market!
 
+  "String representation of the outcome"
   value: String!
 
+  "Original bytes for the outcome of a categorical market"
   valueRaw: Bytes
 
   "The payout numerator for this outcome. Is available as soon as a report is done and is updated during the dispute and market finalization"
