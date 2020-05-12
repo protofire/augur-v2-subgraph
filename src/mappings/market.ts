@@ -18,7 +18,8 @@ import {
   createAndSaveFinalizeMarketEvent,
   createAndSaveOIChangeMarketEvent,
   getMarketTypeFromInt,
-  getOutcomesForMarket
+  createOutcomesForMarket,
+  updateOutcomesForMarket
 } from "../utils/helpers";
 import {
   ZERO_ADDRESS,
@@ -58,11 +59,15 @@ export function handleMarketCreated(event: MarketCreated): void {
   market.prices = event.params.prices;
   market.marketTypeRaw = event.params.marketType;
   market.marketType = getMarketTypeFromInt(event.params.marketType);
-  market.outcomes = getOutcomesForMarket(event.params.outcomes, market.marketType, market.id);
-  market.numOutcomes = event.params.outcomes.length;
   market.timestamp = event.params.timestamp;
   market.noShowBond = event.params.noShowBond;
   market.status = STATUS_TRADING;
+  market.numOutcomes = createOutcomesForMarket(
+    event.params.outcomes,
+    market.marketType,
+    market.id
+  );
+
   market.save();
 
   universe.save();
@@ -79,8 +84,8 @@ export function handleMarketCreated(event: MarketCreated): void {
 
 export function handleMarketFinalized(event: MarketFinalized): void {
   let market = getOrCreateMarket(event.params.market.toHexString());
-  let dispute = getOrCreateDispute(event.params.market.toHexString())
-  let marketReport = getOrCreateMarketReport(event.params.market.toHexString())
+  let dispute = getOrCreateDispute(event.params.market.toHexString());
+  let marketReport = getOrCreateMarketReport(event.params.market.toHexString());
 
   dispute.isDone = true;
 
@@ -93,6 +98,8 @@ export function handleMarketFinalized(event: MarketFinalized): void {
   dispute.save();
 
   createAndSaveFinalizeMarketEvent(event);
+
+  updateOutcomesForMarket(market.id, marketReport.payoutNumerators, true);
 }
 
 // - event: MarketTransferred(indexed address,indexed address,address,address)

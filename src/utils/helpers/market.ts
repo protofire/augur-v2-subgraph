@@ -15,7 +15,7 @@ import {
   MarketFinalized,
   MarketOIChanged
 } from "../../../generated/Augur/Augur";
-import { EthereumEvent, Bytes, log } from "@graphprotocol/graph-ts";
+import { EthereumEvent, Bytes, BigInt, log } from "@graphprotocol/graph-ts";
 import { marketTypes, YES_NO, SCALAR, CATEGORICAL } from "../constants";
 
 export function getOrCreateMarket(
@@ -181,20 +181,21 @@ export function getOrCreateOutcome(
 
   if (outcome == null && createIfNotFound) {
     outcome = new Outcome(id);
+
+    outcome.isFinalNumerator = false;
   }
 
   return outcome as Outcome;
 }
 
-export function getOutcomesForMarket(
+export function createOutcomesForMarket(
   outcomes: Bytes[],
   marketType: String,
   marketId: String
-): String[] {
+): i32 {
   let outcomeAmount = getOutcomesAmountForMarketType(outcomes, marketType);
-  let parsedOutcomes = new Array<String>(outcomeAmount);
-  let invalidOutcome = createInvalidOutcome(marketId);
-  parsedOutcomes.push(invalidOutcome);
+  let numOutcomes = 1;
+  createInvalidOutcome(marketId);
 
   if (marketType == SCALAR) {
     let shortOutcome = getOrCreateOutcome(marketId.concat("-1"));
@@ -209,8 +210,7 @@ export function getOutcomesForMarket(
     shortOutcome.save();
     longOutcome.save();
 
-    parsedOutcomes.push(shortOutcome.id);
-    parsedOutcomes.push(longOutcome.id);
+    numOutcomes = 3;
   } else if (marketType == YES_NO) {
     let noOutcome = getOrCreateOutcome(marketId.concat("-1"));
     let yesOutcome = getOrCreateOutcome(marketId.concat("-2"));
@@ -224,13 +224,12 @@ export function getOutcomesForMarket(
     noOutcome.save();
     yesOutcome.save();
 
-    parsedOutcomes.push(noOutcome.id);
-    parsedOutcomes.push(yesOutcome.id);
+    numOutcomes = 3;
   } else if (marketType == CATEGORICAL) {
     let outcomeId = "";
     for (let i = 0; i < outcomeAmount; i++) {
-      let id = i + 1
-      outcomeId = marketId.concat("-").concat(id.toString()); // because invalid is not present in the outcome list for categoricals
+      let id = i + 1; // because invalid is not present in the outcome list for categoricals
+      outcomeId = marketId.concat("-").concat(id.toString());
 
       let outcome = getOrCreateOutcome(outcomeId);
       outcome.value = outcomes[i].toString();
@@ -238,11 +237,30 @@ export function getOutcomesForMarket(
       outcome.market = marketId;
       outcome.save();
 
-      parsedOutcomes.push(outcomeId);
+      numOutcomes++;
     }
   } else {
     log.error("Market type invalid: {}. Market ID: {}", [marketType, marketId]);
-    return [];
+    return 0;
   }
-  return parsedOutcomes;
+  return numOutcomes;
+}
+
+export function updateOutcomesForMarket(
+  marketId: String,
+  payoutNumerators: BigInt[],
+  isFinal: boolean
+): void {
+  let market = getOrCreateMarket(marketId);
+  for (let i = 0; i < payoutNumerators.length; i++) {
+    let outcomeId = marketId.concat("-").concat(i.toString());
+    let outcome = getOrCreateOutcome(outcomeId, false);
+    if (outcome == null) {
+      log.error("Outcome {} doesn't exist...", [outcomeId]);
+    } else {
+      outcome.payoutNumerator = payoutNumerators[i];
+      outcome.isFinalNumerator = isFinal;
+      outcome.save();
+    }
+  }
 }

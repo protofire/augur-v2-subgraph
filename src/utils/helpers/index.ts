@@ -9,7 +9,8 @@ export {
   getEventId,
   getMarketTypeFromInt,
   getOrCreateOutcome,
-  getOutcomesForMarket
+  createOutcomesForMarket,
+  updateOutcomesForMarket
 } from "./market";
 
 export {

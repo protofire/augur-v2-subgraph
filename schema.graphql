@@ -87,7 +87,7 @@ type Market @entity {
 
   marketType: MarketType!
 
-  outcomes: [Outcome!]!
+  outcomes: [Outcome!]! @derivedFrom(field:"market")
 
   numOutcomes: Int!
 
@@ -232,7 +232,9 @@ type ShareToken @entity {
 
   balance: BigInt!
 
-  outcome: BigInt!
+  outcome: Outcome!
+
+  outcomeRaw: BigInt!
 
   market: Market!
 }
@@ -499,7 +501,11 @@ type Outcome @entity {
 
   valueRaw: Bytes
 
-  payoutValue: BigInt
+  "The payout numerator for this outcome. Is available as soon as a report is done and is updated during the dispute and market finalization"
+  payoutNumerator: BigInt
+
+  "Whether the payout numerator is final"
+  isFinalNumerator: Boolean!
 }
 
 type Augur @entity {

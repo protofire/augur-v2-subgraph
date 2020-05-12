@@ -103,7 +103,7 @@ export function handleTokenBalanceChanged(event: TokenBalanceChanged): void {
     userTokenBalance.universe = event.params.universe.toHexString();
     userTokenBalance.token = event.params.token.toHexString();
     userTokenBalance.balance = event.params.balance;
-    userTokenBalance.attoBalance = toDecimal(event.params.balance)
+    userTokenBalance.attoBalance = toDecimal(event.params.balance);
     userTokenBalance.save();
   } else if (tokenType == DISPUTE_CROWDSOURCER) {
     let userTokenBalance = getOrCreateUserDisputeTokenBalance(
@@ -115,7 +115,7 @@ export function handleTokenBalanceChanged(event: TokenBalanceChanged): void {
     userTokenBalance.user = targetUser.id;
     userTokenBalance.outcome = event.params.outcome;
     userTokenBalance.balance = event.params.balance;
-    userTokenBalance.attoBalance = toDecimal(event.params.balance)
+    userTokenBalance.attoBalance = toDecimal(event.params.balance);
     userTokenBalance.save();
   } else if (tokenType == PARTICIPATION_TOKEN) {
     let userTokenBalance = getOrCreateUserParticipationTokenBalance(
@@ -140,6 +140,10 @@ export function handleShareTokenBalanceChanged(
   event: ShareTokenBalanceChanged
 ): void {
   let user = getOrCreateUser(event.params.account.toHexString());
+  let outcomeId = event.params.market
+    .toHexString()
+    .concat("-")
+    .concat(event.params.outcome.toString());
   let shareTokenId = event.params.market
     .toHexString()
     .concat("-")
@@ -148,7 +152,8 @@ export function handleShareTokenBalanceChanged(
     .concat(event.params.outcome.toString());
   let shareToken = getOrCreateShareToken(shareTokenId);
   shareToken.balance = event.params.balance;
-  shareToken.outcome = event.params.outcome;
+  shareToken.outcomeRaw = event.params.outcome;
+  shareToken.outcome = outcomeId;
   shareToken.market = event.params.market.toHexString();
   shareToken.owner = user.id;
   shareToken.save();

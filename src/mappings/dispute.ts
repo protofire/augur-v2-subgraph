@@ -14,7 +14,8 @@ import {
   getOrCreateDispute,
   getOrCreateDisputeRound,
   getOrCreateDisputeWindow,
-  getOrCreateDisputeCrowdsourcer
+  getOrCreateDisputeCrowdsourcer,
+  updateOutcomesForMarket
 } from "../utils/helpers";
 import {
   ZERO_ADDRESS,
@@ -70,6 +71,8 @@ export function handleInitialReportSubmitted(
   disputeRound.save();
   market.save();
   marketReport.save();
+
+  updateOutcomesForMarket(market.id, event.params.payoutNumerators, false);
 }
 
 // - event: DisputeCrowdsourcerCompleted(indexed address,indexed address,address,uint256[],uint256,uint256,bool,uint256,uint256,uint256,uint256)
@@ -97,6 +100,8 @@ export function handleDisputeCrowdsourcerCompleted(
   market.save();
   marketReport.save();
   disputeCrowdsourcer.save();
+
+  updateOutcomesForMarket(market.id, event.params.payoutNumerators, false);
 }
 
 // - event: DisputeCrowdsourcerContribution(indexed address,indexed address,indexed address,address,uint256,string,uint256[],uint256,uint256,uint256,uint256)
