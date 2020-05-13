@@ -1,4 +1,12 @@
-import { Address, BigInt, Bytes, Value, log } from "@graphprotocol/graph-ts";
+import {
+  Address,
+  BigInt,
+  Bytes,
+  Value,
+  log,
+  json,
+  JSONValueKind
+} from "@graphprotocol/graph-ts";
 import {
   MarketCreated,
   MarketTransferred,
@@ -19,7 +27,9 @@ import {
   createAndSaveOIChangeMarketEvent,
   getMarketTypeFromInt,
   createOutcomesForMarket,
-  updateOutcomesForMarket
+  updateOutcomesForMarket,
+  getOrCreateMarketTemplateInput,
+  getOrCreateMarketTemplate
 } from "../utils/helpers";
 import {
   ZERO_ADDRESS,
@@ -52,7 +62,6 @@ export function handleMarketCreated(event: MarketCreated): void {
   market.creator = creator.id;
   market.universe = universe.id;
   market.owner = creator.id;
-  market.extraInfo = event.params.extraInfo;
   market.numTicks = event.params.numTicks;
   market.designatedReporter = designatedReporter.id;
   market.endTimestamp = event.params.endTime;
@@ -67,6 +76,33 @@ export function handleMarketCreated(event: MarketCreated): void {
     market.marketType,
     market.id
   );
+  market.extraInfoRaw = event.params.extraInfo;
+  let extraInfoParsed = json.try_fromBytes(
+    Bytes.fromUTF8(market.extraInfoRaw) as Bytes
+  );
+  let isOk = extraInfoParsed.isOk;
+  if (isOk) {
+    let extraInfoObject = extraInfoParsed.value.toObject();
+    let description = extraInfoObject.get("description");
+    if (description.kind == JSONValueKind.STRING) {
+      market.description = extraInfoObject.get("description").toString();
+    }
+    let longDescription = extraInfoObject.get("longDescription");
+    if (longDescription.kind == JSONValueKind.STRING) {
+      market.longDescription = extraInfoObject.get("longDescription").toString();
+    }
+    let categories = extraInfoObject.get("categories")
+    if (categories.kind == JSONValueKind.ARRAY) {
+      let categoryArray = categories.toArray()
+      let resultingArray = new Array<String>()
+      for(let i = 0; i < categoryArray.length; i++) {
+        if(categoryArray[i].kind == JSONValueKind.STRING) {
+          resultingArray.push(categoryArray[i].toString())
+        }
+      }
+      market.categories = resultingArray;
+    }
+  }
 
   market.save();
 
@@ -92,7 +128,7 @@ export function handleMarketFinalized(event: MarketFinalized): void {
   market.status = STATUS_FINALIZED;
 
   marketReport.isFinal = true;
-  marketReport.payoutNumerators = event.params.winningPayoutNumerators
+  marketReport.payoutNumerators = event.params.winningPayoutNumerators;
 
   marketReport.save();
   market.save();

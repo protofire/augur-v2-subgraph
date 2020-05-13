@@ -18,7 +18,6 @@ import {
 } from "../../../generated/Augur/Augur";
 import {
   Address,
-  EthereumEvent,
   BigInt,
   Bytes,
   log

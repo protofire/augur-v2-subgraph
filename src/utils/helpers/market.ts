@@ -15,7 +15,7 @@ import {
   MarketFinalized,
   MarketOIChanged
 } from "../../../generated/Augur/Augur";
-import { EthereumEvent, Bytes, BigInt, log } from "@graphprotocol/graph-ts";
+import { ethereum, Bytes, BigInt, log } from "@graphprotocol/graph-ts";
 import { marketTypes, YES_NO, SCALAR, CATEGORICAL } from "../constants";
 
 export function getOrCreateMarket(
@@ -125,7 +125,7 @@ export function createAndSaveOIChangeMarketEvent(
   event.save();
 }
 
-export function getEventId(event: EthereumEvent): String {
+export function getEventId(event: ethereum.Event): String {
   return event.transaction.hash
     .toHexString()
     .concat("-")
@@ -263,4 +263,30 @@ export function updateOutcomesForMarket(
       outcome.save();
     }
   }
+}
+
+export function getOrCreateMarketTemplate(
+  id: String,
+  createIfNotFound: boolean = true
+): MarketTemplate {
+  let template = MarketTemplate.load(id);
+
+  if (template == null && createIfNotFound) {
+    template = new MarketTemplate(id);
+  }
+
+  return template as MarketTemplate;
+}
+
+export function getOrCreateMarketTemplateInput(
+  id: String,
+  createIfNotFound: boolean = true
+): MarketTemplateInput {
+  let input = MarketTemplateInput.load(id);
+
+  if (input == null && createIfNotFound) {
+    input = new MarketTemplateInput(id);
+  }
+
+  return input as MarketTemplateInput;
 }

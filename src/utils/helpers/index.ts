@@ -10,7 +10,9 @@ export {
   getMarketTypeFromInt,
   getOrCreateOutcome,
   createOutcomesForMarket,
-  updateOutcomesForMarket
+  updateOutcomesForMarket,
+  getOrCreateMarketTemplate,
+  getOrCreateMarketTemplateInput
 } from "./market";
 
 export {

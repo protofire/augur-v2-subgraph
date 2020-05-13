@@ -79,7 +79,25 @@ type Market @entity {
   owner: User!
 
   "Extra information in JSON format. Includes market description and possibly other information"
-  extraInfo: String!
+  extraInfoRaw: String!
+
+  "Description parsed from the extra info field. Could be null if not present in the JSON"
+  description: String
+
+  "Long description parsed from the extra info field. Could be null if not present in the JSON"
+  longDescription: String
+
+  "Category array parsed from the extra info field. Could be null if not present in the JSON"
+  categories: [String!]
+
+  "Scalar denomination parsed from the extra info field. Could be null if not present in the JSON"
+  scalarDenomination: Boolean
+
+  "Offset name parsed from the extra info field. Could be null if not present in the JSON"
+  offsetName: String
+
+  "Market template parsed from the extra info field. Could be null if not present in the JSON"
+  template: MarketTemplate
 
   "Number of Ticks in a complete set"
   numTicks: BigInt!
@@ -600,4 +618,28 @@ type Contract @entity {
   lastModified: BigInt!
 
   augur: Augur!
+}
+
+type MarketTemplate @entity {
+  "Hash of the market MarketTemplate"
+  id: ID!
+
+  question: String!
+
+  inputs: [MarketTemplateInput!]! @derivedFrom(field: "template")
+}
+
+type MarketTemplateInput @entity {
+  "Unique id, composed of market template hash + internal input id"
+  id: ID!
+
+  internalId: Int!
+
+  template: MarketTemplate!
+
+  value: String!
+
+  type: String!
+
+  timestamp: BigInt!
 }
