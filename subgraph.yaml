@@ -44,6 +44,8 @@ dataSources:
         - DisputeWindow
         - DisputeRound
         - DisputeCrowdsourcer
+        - MarketTemplate
+        - MarketTemplateInput
       abis:
         - name: Augur
           file: ./abis/Augur.json

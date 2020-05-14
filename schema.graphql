@@ -59,7 +59,6 @@ type Universe @entity {
   "Latest warpSync file hash"
   warpSyncHash: BigInt
 
-  ""
   markets: [Market!]! @derivedFrom(field: "universe")
 
   "Children universe that this universe created when it forked. It can be null if the universe hasn't forked"
@@ -506,8 +505,10 @@ type MarketReport @entity {
   "Whether the current report is final and won't be subject to change because of challenges"
   isFinal: Boolean!
 
+  "Timestamp when the report was last updated"
   lastReportedAt: BigInt!
 
+  "Timestamp of the first report"
   firstReportedAt: BigInt!
 }
 
@@ -517,6 +518,7 @@ type Dispute @entity {
   "Updated report for the market"
   currentReport: MarketReport!
 
+  "Entity for the current dispute round in process"
   currentDisputeRound: DisputeRound!
 
   market: Market!
@@ -526,6 +528,7 @@ type Dispute @entity {
   "Depicts whether the dispute is completed or not. It will be done once the market has finalized because the tentative outcome hasn't been challenged in a whole dispute window"
   isDone: Boolean!
 
+  "List of all the dispute rounds so far"
   rounds: [DisputeRound!]! @derivedFrom(field: "dispute")
 
   creationTimestamp: BigInt!
@@ -540,8 +543,10 @@ type DisputeWindow @entity {
 
   universe: Universe!
 
+  "Timestamp of the start of the window"
   startTime: BigInt!
 
+  "Timestamp of the end of the window"
   endTime: BigInt!
 }
 
@@ -554,6 +559,7 @@ type DisputeRound @entity {
 
   universe: Universe!
 
+  "List of all the dispute crowdsourcers active for this round"
   crowdsourcers: [DisputeCrowdsourcer!]! @derivedFrom(field: "disputeRound")
 }
 
@@ -614,10 +620,13 @@ type Augur @entity {
 }
 
 type Contract @entity {
+  "Internal key of the contract"
   id: ID!
 
+  "Latest Contract address"
   address: String!
 
+  "Timestamp of last modification"
   lastModified: BigInt!
 
   augur: Augur!
