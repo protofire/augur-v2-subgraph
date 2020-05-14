@@ -60,7 +60,6 @@ type Universe @entity {
   "Latest warpSync file hash"
   warpSyncHash: BigInt
 
-  ""
   markets: [Market!]! @derivedFrom(field: "universe")
 
   "Children universe that this universe created when it forked. It can be null if the universe hasn't forked"
@@ -553,3 +552,9 @@ It holds data such as the payoutNumerators for the crowdsourcer, which represent
 #### Augur metadata
 
 We also added some entities to track some events that are related to some global internal data for augur, such as deployment data and different internal contracts. The entities responsible for this are `Augur` and `Contract`.
+
+#### Time-travel queries
+
+TheGraph allows for queries to receive a block number parameter, which in turns makes that query result to represent the state aggregated until that block number, effectively allowing to query for the state of entities in that given block number.
+
+This behaviour allows some interesting use cases. For more info on "Time-Travel" queries, visit [this article by the Blocklytics team!](https://blocklytics.org/blog/ethereum-blocks-subgraph-made-for-time-travel/)
