@@ -182,7 +182,15 @@ We track and save all the Market events that we handled to get the current statu
 
 #### Market Type
 
+There are 3 different Market Types in Augur, which are the following:
 
+* Yes/No Markets
+* Categorical Markets
+* Scalar Markets
+
+Yes/No Markets and Categorical Markets are mostly the same, with the exception that Yes/No markets only have 3 fixed outcomes: Yes, No and Invalid (All markets can be Invalid, so it's always a possible Outcome), and Categorical Markets can have up to 8 custom outcomes (for a total of 9, counting Invalid).
+
+Scalar markets on the other hand can either be Invalid, or they can have an outcome defined within a numerical range. They use some of the market settings (such as min and max price, and number of ticks) in a different way, to allow for this range outcome.
 
 #### Market events
 
@@ -452,3 +460,96 @@ type Outcome @entity {
 ```
 
 The valueRaw can only exist for categorical markets, since they are the only market type with "custom" outcomes.
+
+It's worth noting that during the market Reporting and Disputing, the reported outcomes are not represented as the given Outcomes, but rather as a Payout Numerator (or Payout Set) which represents the share of the winnings that each outcome should be given, since not all markets have a single outcome as a winner, and the implementation has to be able to work for all market types.
+
+#### Dispute
+
+The Market dispute phase is one of the most complex parts of the market lifecycle, so we decided the best way to represent this was with different entities for each of the pieces of the dispute.
+
+The main entity is Dispute, which depicts the overview of the whole disputing process for a given Market. It includes the current MarketReport, the current DisputeRound in progress, the Market it belongs to, the Universe it belongs to, and some more data to help get the big picture of that disputing process.
+
+```graphql
+type Dispute @entity {
+  id: ID!
+
+  "Updated report for the market"
+  currentReport: MarketReport!
+
+  "Entity for the current dispute round in process"
+  currentDisputeRound: DisputeRound!
+
+  market: Market!
+
+  universe: Universe!
+
+  "Depicts whether the dispute is completed or not. It will be done once the market has finalized because the tentative outcome hasn't been challenged in a whole dispute window"
+  isDone: Boolean!
+
+  "List of all the dispute rounds so far"
+  rounds: [DisputeRound!]! @derivedFrom(field: "dispute")
+
+  creationTimestamp: BigInt!
+
+  block: BigInt!
+
+  tx_hash: String!
+}
+```
+
+The dispute process in Augur starts once the first report for a Market is emitted and the first "Tentative Outcome" is made public. After that, the current "Tentative Outcome" can be disputed (or challenged) by REP holders who think that the outcome selected is not real Outcome for the "Real-World" event, and they can stake REP towards another Outcome. This is done with "DisputeCrowdsourcers" which just collect the REP staked towards a given Outcome, and if the required amount of REP is filled, then the "Tentative Outcome" is successfully disputed and the Dispute process continues in a new "Dispute Round", in which the "Tentative Outcome" for that round will be the Outcome that successfully challenged the initial report.
+
+That same behaviour keeps happening during different "Dispute Rounds", for as long as needed to end up with a "Dispute Round" where there's no challenge achieved to the current "Tentative Outcome". In that case, the last "Tentative Outcome" is considered the Final Outcome for the Market, and the finalization and settlement of the market begins.
+
+#### DisputeRound
+
+The DisputeRound entity is just a simple entity that holds the information for that round, mainly the list of DisputeCrowdsourcers active on that specific round, and the market and universe information linked to that Dispute process.
+
+```graphql
+type DisputeRound @entity {
+  id: ID!
+
+  dispute: Dispute!
+
+  market: Market!
+
+  universe: Universe!
+
+  "List of all the dispute crowdsourcers active for this round"
+  crowdsourcers: [DisputeCrowdsourcer!]! @derivedFrom(field: "disputeRound")
+}
+```
+
+#### DisputeCrowdsourcer
+
+The DisputeCrowdsourcer entity tracks the state of the crowdsourcers on a given DisputeRound.
+
+```graphql
+type DisputeCrowdsourcer @entity {
+  id: ID!
+
+  market: Market!
+
+  universe: Universe!
+
+  "Payout numerators depict all the outcomes and their respective 'share' of the winnings based on the numTick of the market"
+  payoutNumerators: [BigInt!]!
+
+  "Amount of attoREP staked"
+  staked: BigInt!
+
+  "Amount of attoREP needed for the dispute bond to be filled and challenge/dispute the current tentative report"
+  disputeBondSize: BigInt!
+
+  "Whether the bond has been filled or not"
+  bondFilled: Boolean!
+
+  disputeRound: DisputeRound!
+}
+```
+
+It holds data such as the payoutNumerators for the crowdsourcer, which representes the Outcome for the market, as stated earlier, the amount of REP staked towards that Outcome, the amount of REP needed to fill the dispute bond and successfully dispute the Tentative Outcome, and whether or not this bond has been filled.
+
+#### Augur metadata
+
+We also added some entities to track some events that are related to some global internal data for augur, such as deployment data and different internal contracts. The entities responsible for this are `Augur` and `Contract`.
