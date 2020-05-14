@@ -5,7 +5,8 @@ import {
   Value,
   log,
   json,
-  JSONValueKind
+  JSONValueKind,
+  JSONValue
 } from "@graphprotocol/graph-ts";
 import {
   MarketCreated,
@@ -28,7 +29,6 @@ import {
   getMarketTypeFromInt,
   createOutcomesForMarket,
   updateOutcomesForMarket,
-  getOrCreateMarketTemplateInput,
   getOrCreateMarketTemplate
 } from "../utils/helpers";
 import {
@@ -77,6 +77,8 @@ export function handleMarketCreated(event: MarketCreated): void {
     market.id
   );
   market.extraInfoRaw = event.params.extraInfo;
+
+  // Parsing the JSON data, safe check of every parsed value before saving.
   let extraInfoParsed = json.try_fromBytes(
     Bytes.fromUTF8(market.extraInfoRaw) as Bytes
   );
@@ -85,12 +87,14 @@ export function handleMarketCreated(event: MarketCreated): void {
     let extraInfoObject = extraInfoParsed.value.toObject();
     let description = extraInfoObject.get("description");
     if (description.kind == JSONValueKind.STRING) {
-      market.description = extraInfoObject.get("description").toString();
+      market.description = description.toString();
     }
+
     let longDescription = extraInfoObject.get("longDescription");
     if (longDescription.kind == JSONValueKind.STRING) {
-      market.longDescription = extraInfoObject.get("longDescription").toString();
+      market.longDescription = longDescription.toString();
     }
+
     let categories = extraInfoObject.get("categories")
     if (categories.kind == JSONValueKind.ARRAY) {
       let categoryArray = categories.toArray()
@@ -101,6 +105,22 @@ export function handleMarketCreated(event: MarketCreated): void {
         }
       }
       market.categories = resultingArray;
+    }
+
+    let scalarDenomination = extraInfoObject.get("_scalarDenomination");
+    if(scalarDenomination.kind == JSONValueKind.BOOL) {
+      market.scalarDenomination = scalarDenomination.toBool();
+    }
+
+    let offsetName = extraInfoObject.get("offsetName");
+    if(offsetName.kind == JSONValueKind.STRING) {
+      market.offsetName = offsetName.toString();
+    }
+
+    let template = extraInfoObject.get("template");
+    if(template.kind == JSONValueKind.OBJECT) {
+      // This creates a market template if possible, and returns its' id or null if it can't be parsed
+      market.template = getOrCreateMarketTemplate(template as JSONValue, market.id) as String;
     }
   }
 

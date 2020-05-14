@@ -11,8 +11,7 @@ export {
   getOrCreateOutcome,
   createOutcomesForMarket,
   updateOutcomesForMarket,
-  getOrCreateMarketTemplate,
-  getOrCreateMarketTemplateInput
+  getOrCreateMarketTemplate
 } from "./market";
 
 export {

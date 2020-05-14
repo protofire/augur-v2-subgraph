@@ -99,6 +99,9 @@ type Market @entity {
   "Market template parsed from the extra info field. Could be null if not present in the JSON"
   template: MarketTemplate
 
+  "Template inputs selected on market creation. Could be null if not present in the JSON"
+  templateInputs: [MarketTemplateInput!]! @derivedFrom(field: "market")
+
   "Number of Ticks in a complete set"
   numTicks: BigInt!
 
@@ -624,22 +627,28 @@ type MarketTemplate @entity {
   "Hash of the market MarketTemplate"
   id: ID!
 
-  question: String!
+  question: String
 
+  "Markets that use this template"
+  markets: [Market!]! @derivedFrom(field: "template")
+
+  "Inputs used with this template on the markets that use it"
   inputs: [MarketTemplateInput!]! @derivedFrom(field: "template")
 }
 
 type MarketTemplateInput @entity {
-  "Unique id, composed of market template hash + internal input id"
+  "Unique id, composed of market template hash + market Id + internal input id"
   id: ID!
 
-  internalId: Int!
+  internalId: BigInt!
 
   template: MarketTemplate!
 
-  value: String!
+  market: Market!
 
-  type: String!
+  value: String
 
-  timestamp: BigInt!
+  type: String
+
+  timestamp: BigInt
 }

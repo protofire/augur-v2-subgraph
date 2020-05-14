@@ -6,7 +6,9 @@ import {
   TransferMarketEvent,
   OIChangeMarketEvent,
   MarketReport,
-  Outcome
+  Outcome,
+  MarketTemplate,
+  MarketTemplateInput
 } from "../../../generated/schema";
 import {
   MarketCreated,
@@ -15,7 +17,14 @@ import {
   MarketFinalized,
   MarketOIChanged
 } from "../../../generated/Augur/Augur";
-import { ethereum, Bytes, BigInt, log } from "@graphprotocol/graph-ts";
+import {
+  ethereum,
+  Bytes,
+  BigInt,
+  log,
+  JSONValueKind,
+  JSONValue
+} from "@graphprotocol/graph-ts";
 import { marketTypes, YES_NO, SCALAR, CATEGORICAL } from "../constants";
 
 export function getOrCreateMarket(
@@ -266,27 +275,94 @@ export function updateOutcomesForMarket(
 }
 
 export function getOrCreateMarketTemplate(
-  id: String,
+  json: JSONValue,
+  marketId: String,
   createIfNotFound: boolean = true
-): MarketTemplate {
-  let template = MarketTemplate.load(id);
+): String | null {
+  let jsonObject = json.toObject();
+  let hash = jsonObject.get("hash");
+  if (hash.kind == JSONValueKind.STRING) {
+    let template = MarketTemplate.load(hash.toString());
 
-  if (template == null && createIfNotFound) {
-    template = new MarketTemplate(id);
+    if (template == null && createIfNotFound) {
+      template = new MarketTemplate(hash.toString());
+
+      let question = jsonObject.get("question");
+      if (question.kind == JSONValueKind.STRING) {
+        template.question = question.toString();
+      }
+    }
+
+    let inputs = jsonObject.get("inputs");
+    if (inputs.kind == JSONValueKind.ARRAY) {
+      createInputsForMarketTemplate(
+        inputs.toArray(),
+        hash.toString(),
+        marketId
+      );
+    }
+
+    template.save();
+
+    return template.id;
+  } else {
+    log.warning("Couldn't parse market template for market {}", [marketId]);
+    return null;
   }
-
-  return template as MarketTemplate;
 }
 
-export function getOrCreateMarketTemplateInput(
-  id: String,
-  createIfNotFound: boolean = true
-): MarketTemplateInput {
-  let input = MarketTemplateInput.load(id);
-
-  if (input == null && createIfNotFound) {
-    input = new MarketTemplateInput(id);
+function createInputsForMarketTemplate(
+  inputs: Array<JSONValue>,
+  templateId: String,
+  marketId: String
+): void {
+  for (let i = 0; i < inputs.length; i++) {
+    if (inputs[i].kind == JSONValueKind.OBJECT) {
+      createMarketTemplateInput(inputs[i], templateId, marketId);
+    }
   }
+}
 
-  return input as MarketTemplateInput;
+function createMarketTemplateInput(
+  json: JSONValue,
+  templateId: String,
+  marketId: String
+): void {
+  let jsonObject = json.toObject();
+  let internalId = jsonObject.get("id");
+  if (internalId.kind == JSONValueKind.NUMBER) {
+    let id = templateId.concat('-').concat(marketId).concat('-').concat(internalId.toBigInt().toString())
+    let input = MarketTemplateInput.load(id);
+
+    if (input == null) {
+      input = new MarketTemplateInput(id);
+      input.internalId = internalId.toBigInt();
+
+      let value = jsonObject.get("value")
+      if(value.kind == JSONValueKind.STRING) {
+        input.value = value.toString();
+      }
+
+      let type = jsonObject.get("type")
+      if(type.kind == JSONValueKind.STRING) {
+        input.type = type.toString();
+      }
+
+      let timestamp = jsonObject.get("timestamp")
+      if(timestamp.kind == JSONValueKind.NUMBER) {
+        input.timestamp = timestamp.toBigInt();
+      }
+
+      input.market = marketId;
+      input.template = templateId;
+
+      input.save();
+
+    }
+  } else {
+    log.warning("Couldn't parse input for template {} and market {}", [
+      templateId,
+      marketId
+    ]);
+  }
 }
