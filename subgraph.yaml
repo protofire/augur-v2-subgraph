@@ -1,16 +1,16 @@
 specVersion: 0.0.2
-description: Augur v2 subgraph
+description: Subgraph for the Augur v2 Kovan contracts which tracks Universes, Markets, all the market events and disputing process, all user related balances and token events within the Augur ecosystem (Reputation, Participation and Dispute tokens), as well as metadata from the Augur contract.
 repository: https://github.com/protofire/augur-v2-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: Augur
-    network: kovan
+    network: mainnet
     source:
-      address: "0x2884ac66c8a752A4A3445f50faFb4e1f0b502796"
+      address: "0x23916a8F5C3846e3100e5f587FF14F3098722F5d"
       abi: Augur
-      startBlock: 18010675
+      startBlock: 10543755
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4

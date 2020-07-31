@@ -1,4 +1,4 @@
-## Augur v2 subgraph (Kovan)
+## Augur v2 subgraph
 
 This subgraph aims to make it simple to get data from the Augur protocol, to simplify app development by transforming the raw data from the blockchain events into entities that should make it easier to understand how the protocol works and how entities are linked together.
 
